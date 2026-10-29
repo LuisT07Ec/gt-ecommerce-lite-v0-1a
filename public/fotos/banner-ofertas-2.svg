@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="bg_banner-ofertas-2.svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14161F"/>
+      <stop offset="55%" stop-color="#0D0E13"/>
+      <stop offset="100%" stop-color="#064E3B"/>
+    </linearGradient>
+    <radialGradient id=" flare_banner-ofertas-2.svg" cx="82%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="420" rx="28" fill="url(#bg_banner-ofertas-2.svg)"/>
+  <rect width="1200" height="420" rx="28" fill="url(#flare_banner-ofertas-2.svg)"/>
+  <circle cx="980" cy="210" r="150" fill="#ffffff" fill-opacity="0.04" stroke="#10B981" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="980" cy="210" r="105" fill="#10B981" fill-opacity="0.12"/>
+  <text x="980" y="235" font-size="110" text-anchor="middle">🛍️</text>
+  <rect x="64" y="68" width="390" height="34" rx="17" fill="#10B981" fill-opacity="0.2" stroke="#10B981" stroke-opacity="0.5"/>
+  <text x="259" y="90" font-family="system-ui, sans-serif" font-size="13" font-weight="800" fill="#FFFFFF" letter-spacing="1.5" text-anchor="middle">OFERTAS LIQUID GLASS • TEMPORADA</text>
+  <text x="64" y="172" font-family="system-ui, sans-serif" font-size="48" font-weight="900" fill="#FFFFFF">Colección Disney & Pixar 20cm</text>
+  <text x="64" y="228" font-family="system-ui, sans-serif" font-size="21" font-weight="500" fill="#CBD5E1">Ahorra hasta 44% en docenas surtidas de peluches y figuras articuladas en stock.</text>
+</svg>

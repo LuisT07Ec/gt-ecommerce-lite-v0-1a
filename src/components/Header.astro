@@ -1,0 +1,215 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  activePage?: 'catalogo' | 'carrito' | 'confirmado';
+  whatsappNumber?: string;
+  storeName?: string;
+}
+
+const {
+  activePage = 'catalogo',
+  whatsappNumber = '593992576986',
+  storeName = 'WIGGER SHOP 2',
+} = Astro.props;
+---
+
+<header class="sticky top-0 z-40 w-full glass-header pt-safe">
+  <!-- Top Micro Promo Bar -->
+  <div class="bg-[#08090C]/90 border-b border-white/5 px-4 py-1 flex items-center justify-center gap-2 text-[11px] text-on-surface-variant">
+    <Icon name="local_shipping" class="w-3.5 h-3.5 text-[#FF5722] shrink-0" />
+    <span class="uppercase tracking-wider font-semibold truncate">
+      {storeName} • Paso Retirar $0.00 (15 min) | Envío a Domicilio $1.50 (35 min)
+    </span>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+    <!-- Left: Hamburger & Official Brand Logo -->
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        aria-label="Abrir Menú de Navegación"
+        class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+        data-action="toggle-sidebar"
+      >
+        <Icon name="menu" class="w-6 h-6" />
+      </button>
+
+      <a class="flex items-center gap-2.5 group" href="/">
+        <div class="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-md flex items-center justify-center p-0.5 border border-white/20 group-hover:scale-105 transition-transform">
+          <img
+            src="/fotos/logo-wigoo.svg"
+            alt="Logo Wigoo Shop EC"
+            width="36"
+            height="36"
+            class="w-full h-full object-cover rounded-[10px]"
+          />
+        </div>
+        <div class="flex flex-col">
+          <span class="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1 leading-none">
+            Wigoo Shop <span class="text-[#FF5722] font-black text-sm italic">EC</span>
+          </span>
+          <span class="text-[10px] text-slate-400 font-medium tracking-wide">
+            {storeName} • Oficial
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Center: Desktop Navigation Pills -->
+    <nav
+      aria-label="Navegación principal"
+      class="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-2xl p-1"
+    >
+      <a
+        href="/"
+        aria-current={activePage === 'catalogo' ? 'page' : undefined}
+        class:list={[
+          'px-4 py-1.5 rounded-xl text-xs transition-all',
+          activePage === 'catalogo'
+            ? 'bg-[#FF5722] text-white font-bold shadow-md shadow-orange-950/60'
+            : 'font-medium text-slate-300 hover:text-white hover:bg-white/5',
+        ]}
+      >
+        Catálogo
+      </a>
+      <a
+        href="/carrito"
+        aria-current={activePage === 'carrito' ? 'page' : undefined}
+        class:list={[
+          'px-4 py-1.5 rounded-xl text-xs transition-all',
+          activePage === 'carrito'
+            ? 'bg-[#FF5722] text-white font-bold shadow-md shadow-orange-950/60'
+            : 'font-medium text-slate-300 hover:text-white hover:bg-white/5',
+        ]}
+      >
+        Carrito
+      </a>
+      <button
+        type="button"
+        data-action="open-order-modal"
+        class="px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+      >
+        Confirmar Pedido
+      </button>
+      <a
+        href="/pedido-confirmado"
+        aria-current={activePage === 'confirmado' ? 'page' : undefined}
+        class:list={[
+          'px-4 py-1.5 rounded-xl text-xs transition-all',
+          activePage === 'confirmado'
+            ? 'bg-[#FF5722] text-white font-bold shadow-md shadow-orange-950/60'
+            : 'font-medium text-slate-300 hover:text-white hover:bg-white/5',
+        ]}
+      >
+        Seguimiento
+      </a>
+    </nav>
+
+    <!-- Right: Cart Trigger with Interactive Badge -->
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        aria-label="Abrir resumen del carrito"
+        data-action="open-cart-drawer"
+        class="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#FF5722]/60 hover:bg-white/10 text-white transition-all flex items-center justify-center group"
+      >
+        <Icon name="shopping_bag" class="w-5 h-5 group-hover:scale-105 transition-transform" />
+        <span
+          id="headerCartCount"
+          class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 rounded-full bg-[#FF5722] text-white text-[11px] font-black flex items-center justify-center shadow-lg shadow-orange-950/80"
+        >
+          0
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Sidebar Navigation Drawer -->
+<div
+  id="sidebarBackdrop"
+  data-action="close-sidebar"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 transition-opacity opacity-0 pointer-events-none duration-300"
+  aria-hidden="true"
+></div>
+<aside
+  id="sidebarDrawer"
+  aria-label="Menú lateral de tienda"
+  class="fixed top-0 left-0 h-full w-72 bg-[#0D0E12] border-r border-white/10 z-50 transform -translate-x-full transition-transform duration-300 p-5 flex flex-col justify-between"
+>
+  <div>
+    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg overflow-hidden bg-white p-0.5">
+          <img
+            src="/fotos/logo-wigoo.svg"
+            alt="Logo Wigoo Shop"
+            width="32"
+            height="32"
+            class="w-full h-full object-cover rounded-md"
+          />
+        </div>
+        <div>
+          <span class="font-extrabold text-white text-sm block leading-none">Wigoo Shop EC</span>
+          <span class="text-[10px] text-[#FF5722] font-bold">{storeName}</span>
+        </div>
+      </div>
+      <button
+        type="button"
+        aria-label="Cerrar menú lateral"
+        data-action="close-sidebar"
+        class="w-8 h-8 rounded-lg bg-white/5 text-slate-400 hover:text-white flex items-center justify-center"
+      >
+        <Icon name="close" class="w-4 h-4" />
+      </button>
+    </div>
+
+    <nav class="mt-6 space-y-2" aria-label="Enlaces del menú lateral">
+      <a
+        href="/"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#FF5722]/15 text-[#FF5722] font-bold text-sm"
+      >
+        <Icon name="storefront" class="w-5 h-5" />
+        <span>Catálogo Principal</span>
+      </a>
+      <a
+        href="/carrito"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm transition-colors"
+      >
+        <Icon name="shopping_cart" class="w-5 h-5" />
+        <span>Mi Carrito de Compras</span>
+      </a>
+      <button
+        type="button"
+        data-action="open-order-modal"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm transition-colors text-left"
+      >
+        <Icon name="local_shipping" class="w-5 h-5" />
+        <span>Confirmar Pedido Directo</span>
+      </button>
+      <a
+        href="/pedido-confirmado"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm transition-colors"
+      >
+        <Icon name="verified_user" class="w-5 h-5" />
+        <span>Estado de Mi Pedido</span>
+      </a>
+      <a
+        href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hola WIGGER SHOP 2 (Wigoo Shop EC), deseo información del catálogo mayorista.')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-emerald-400 hover:text-emerald-300 font-semibold text-sm transition-colors"
+      >
+        <Icon name="whatsapp" class="w-5 h-5" />
+        <span>Atención WhatsApp Directa</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="pt-4 border-t border-white/10 text-xs text-slate-400 space-y-1">
+    <p class="font-bold text-white">© {new Date().getFullYear()} {storeName}</p>
+    <p class="text-[11px]">Liquid Glass Storefront • Quito & Guayaquil, Ecuador</p>
+  </div>
+</aside>
+

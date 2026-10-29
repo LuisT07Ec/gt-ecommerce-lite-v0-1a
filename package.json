@@ -1,0 +1,24 @@
+{
+  "name": "gt-ecommerce-lite-wigoo-ec",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "GT E-commerce Lite (Wigoo Shop EC) — Arquitectura Astro, Google Sheets Proxy, Diseño Stitch Liquid Glass & PageSpeed 95+",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^8.3.4",
+    "@astrojs/tailwind": "^5.1.2",
+    "astro": "^4.16.18",
+    "tailwindcss": "^3.4.17"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
+

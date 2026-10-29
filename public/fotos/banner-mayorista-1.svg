@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420">
+  <defs>
+    <linearGradient id="bg_banner-mayorista-1.svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14161F"/>
+      <stop offset="55%" stop-color="#0D0E13"/>
+      <stop offset="100%" stop-color="#7C2D12"/>
+    </linearGradient>
+    <radialGradient id=" flare_banner-mayorista-1.svg" cx="82%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#FF5722" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#FF5722" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="420" rx="28" fill="url(#bg_banner-mayorista-1.svg)"/>
+  <rect width="1200" height="420" rx="28" fill="url(#flare_banner-mayorista-1.svg)"/>
+  <circle cx="980" cy="210" r="150" fill="#ffffff" fill-opacity="0.04" stroke="#FF5722" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="980" cy="210" r="105" fill="#FF5722" fill-opacity="0.12"/>
+  <text x="980" y="235" font-size="110" text-anchor="middle">🛍️</text>
+  <rect x="64" y="68" width="390" height="34" rx="17" fill="#FF5722" fill-opacity="0.2" stroke="#FF5722" stroke-opacity="0.5"/>
+  <text x="259" y="90" font-family="system-ui, sans-serif" font-size="13" font-weight="800" fill="#FFFFFF" letter-spacing="1.5" text-anchor="middle">MAYORISTAS ECUADOR • DIRECTO DE BODEGA</text>
+  <text x="64" y="172" font-family="system-ui, sans-serif" font-size="48" font-weight="900" fill="#FFFFFF">Precios por Docena y Cajón</text>
+  <text x="64" y="228" font-family="system-ui, sans-serif" font-size="21" font-weight="500" fill="#CBD5E1">Surtido directo para tu negocio, bazar o evento escolar con despacho nacional Servientrega.</text>
+</svg>

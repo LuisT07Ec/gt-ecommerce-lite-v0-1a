@@ -1,0 +1,263 @@
+var ss= SpreadsheetApp.getActiveSpreadsheet(); 
+ 
+function doPost(e){
+  Logger.log("Funcion doPost Ingreso : la fecha y hora: " + new Date());
+  var operacion = JSON.parse(e.postData.contents)
+  var respuesta = ""; 
+  if (operacion.op == "configuracion" ){
+    respuesta = listar_configuracion();
+    if(operacion.id){
+     var respuesta_pedido = JSON.parse(cargar_venta(JSON.stringify(operacion)));
+      if(respuesta_pedido.status=="0"){
+        var json_resultado = JSON.parse(respuesta);
+        json_resultado.pedido=respuesta_pedido.pedido;
+        respuesta = JSON.stringify(json_resultado);
+      }    
+    } 
+  }
+  if (operacion.op == "cargar_venta" ){
+    respuesta = cargar_venta(JSON.stringify(operacion));
+  }
+  if (operacion.op == "venta" ){
+    respuesta = registrar_venta(JSON.stringify(operacion));
+  }
+  if (operacion.op == "pagar" ){
+    respuesta = pagar_venta(JSON.stringify(operacion));
+  }
+ return ContentService.createTextOutput(respuesta).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+function cargar_venta(informacion){
+    var result,jo={};
+ try{
+  var venta = JSON.parse(informacion);
+  var sheet =ss.getSheetByName("Venta");
+  venta.id = venta.id.replace("&m=1", "").replace("?m=1", "");
+  var rows_agencia = sheet.getRange(2,1,sheet.getLastRow()-1, sheet.getLastColumn()).getValues(); 
+  var pedido_="";
+  for(var i = 0, l= rows_agencia.length; i<l ; i++){
+    var dataRow = rows_agencia[i];
+    if((dataRow[0]+"")===(venta.id+"")){
+      pedido_=JSON.parse(dataRow[11]);
+      break;
+    }
+  }  
+  if(pedido_) {
+    jo.status = '0';
+    jo.message = ' OK ';
+    jo.pedido=pedido_;
+    jo.pedido.idpedido=venta.id;
+  }else{
+    jo.status = '1';
+    jo.message = ' No se encontro el pedido '+venta.id;
+  } 
+ } catch (e) {
+    jo.status = '-1';
+    jo.message = e.toString();
+  }
+  var result = JSON.stringify(jo); 
+  return result;
+}
+
+function pagar_venta(informacion){
+  var result,jo={};
+ try{
+   var venta = JSON.parse(informacion);
+   var sheet =ss.getSheetByName("Venta");
+    var rows= sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+    var filtronumero = rows.findLast(function (row) {
+            return (row[0] + "") == "" + venta.idpedido;
+          });
+
+  jo.status = '0';
+  jo.message = ' Se pago la venta exitoisamente'; 
+  notificarmeta("pago_confirmado", filtronumero[9]+" "+filtronumero[10] , filtronumero[5],"","","","")
+   
+  var fila_actualizar = rows.findLastIndex(function (row) {
+            return (row[0] + "") == "" + venta.idpedido;
+          });
+  sheet.getRange(fila_actualizar+2,15).setValue("PAGADO");
+
+ } catch (e) {
+    jo.status = '-1';
+    jo.message = e.toString();
+  }
+  var result = JSON.stringify(jo); 
+  return result;
+}
+function formatomonto(monto,formato_numero,formato_decimal){
+  return parseFloat("" + (parseFloat(""+monto)).toFixed(formato_decimal)).toLocaleString(formato_numero);            
+}
+function registrar_venta(informacion){
+  var result,jo={};
+ try{
+   var venta = JSON.parse(informacion);
+   var sheet =ss.getSheetByName("Venta");
+   var sheetdetalle =ss.getSheetByName("DetalleVenta");
+   var sheet_conf =ss.getSheetByName("Configuracion");
+   var codigoventa = Utilities.getUuid(); //Utilities.formatDate(new Date(), "GMT", "yyyyMMddHHmmss");
+   var backup_edicion="";
+   // EN CASO EXISTA
+   if(venta.operacion=="e" && venta.id){
+     codigoventa=venta.id;
+     var rows_venta = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+     var rows_detalleventa = sheetdetalle.getRange(2, 1, sheetdetalle.getLastRow() - 1, sheetdetalle.getLastColumn()).getValues();
+     for (var il = rows_venta.length-1; il >=0  ;il--) {
+      if(codigoventa==rows_venta[il][0]){
+          backup_edicion =rows_venta[il][11]
+          sheet.deleteRow(il+2);
+          break; 
+        }
+      }
+      for (var il = rows_detalleventa.length-1; il >=0  ;il--) {
+      if(codigoventa==rows_detalleventa[il][0]){
+          sheetdetalle.deleteRow(il+2);
+        }
+      }
+   }  
+   var fecha = Utilities.formatDate(new Date(), "GMT", "yyyy-MM-dd");
+   var hora = Utilities.formatDate(new Date(), "GMT", "HH:mm:ss");   
+   var costo_agencia="";
+   var tiempo_agencia="";
+   var sheet_agencia =ss.getSheetByName("Agencia");
+   var rows_agencia = sheet_agencia.getRange(2,1,sheet_agencia.getLastRow()-1, sheet_agencia.getLastColumn()).getValues(); 
+    for(var i = 0, l= rows_agencia.length; i<l ; i++){
+      if(rows_agencia[i][0]==venta.agencia_entrega){
+      costo_agencia=rows_agencia[i][1];
+      tiempo_agencia=rows_agencia[i][2];
+      break;
+      }         
+    } 
+
+   sheet.appendRow([codigoventa,fecha,hora,venta.nombre_entrega,venta.rut_entrega,venta.telefono_entrega,venta.correo_entrega,venta.direccion_entrega,venta.agencia_entrega,venta.moneda,venta.total,JSON.stringify(venta),costo_agencia,tiempo_agencia,"SOLICITADO",backup_edicion]);
+   var detalle_pedido="";
+   var detalle_pedido_meta="";
+   var formato_numero = sheet_conf.getRange(9, 2).getValue(); 
+   var formato_decimal = sheet_conf.getRange(10, 2).getValue(); 
+
+   for (var i = 0; i < venta.detalle.length; i++) {
+         var item= venta.detalle[i];
+         item.nombre = item.nombre.replace("<b>","").replace("</b>","")
+         detalle_pedido+=item.nombre+" Cant: "+item.cantidad+ " x "+formatomonto(item.precio,formato_numero,formato_decimal)+" = "+item.moneda+""+formatomonto(item.total,formato_numero,formato_decimal)+"\n";
+         detalle_pedido_meta+=item.nombre+" - "+item.moneda+""+formatomonto(item.total,formato_numero,formato_decimal)+"\\n";
+         sheetdetalle.appendRow([codigoventa,item.nombre,item.categoria,item.cantidad,item.precio,item.total]);
+   }
+  jo.status = '0';
+  if(venta.operacion=="e" && venta.id){
+  jo.message = ' Se edito la venta exitosamente'; 
+  }else{
+    jo.message = ' Se grabo la venta exitosamente'; 
+  }
+  jo.message_whatsapp = 'Pedido: '+venta.url+'?o=d&id='+codigoventa+'\n'; 
+  jo.message_whatsapp+= '*NOMBRE Y APELLIDOS:*\n'; 
+  jo.message_whatsapp+= venta.nombre_entrega+"\n"; 
+  jo.message_whatsapp+= '*DOCUMENTO:*'+"\n"; 
+  jo.message_whatsapp+= venta.rut_entrega+"\n";
+  jo.message_whatsapp+= '*TELEFONO:*'+"\n";
+  jo.message_whatsapp+= venta.telefono_entrega+"\n" ;
+  jo.message_whatsapp+= '*CORREO:*'+"\n" ;
+  jo.message_whatsapp+= venta.correo_entrega+"\n" ;
+  jo.message_whatsapp+= '*DIRECCION:*'+"\n"; 
+  jo.message_whatsapp+= venta.direccion_entrega+"\n" ;
+  jo.message_whatsapp+= '*Forma Envio:*'+"\n" ;
+  jo.message_whatsapp+= venta.agencia_entrega+"\n"; 
+  jo.message_whatsapp+= '*PEDIDO:*'+"\n"; 
+  jo.message_whatsapp+= detalle_pedido; 
+  jo.message_whatsapp+= '*Total pedido::*'+venta.moneda+""+ formatomonto(venta.total,formato_numero,formato_decimal)+"\n" ;   
+ } catch (e) {
+    jo.status = '-1';
+    jo.message = e.toString();
+  }
+  var result = JSON.stringify(jo); 
+  return result;
+}
+function listar_configuracion(){
+
+  var result,jo={};
+  var dataArray = [];
+  var dataArrayAgencia = [];
+  var sheet_p =ss.getSheetByName("Producto");
+  var rows_p = sheet_p.getRange(2,1,sheet_p.getLastRow()-1, sheet_p.getLastColumn()).getValues(); 
+
+  var sheet_agencia =ss.getSheetByName("Agencia");
+  var rows_agencia = sheet_agencia.getRange(2,1,sheet_agencia.getLastRow()-1, sheet_agencia.getLastColumn()).getValues(); 
+
+  for(var i = 0, l= rows_agencia.length; i<l ; i++){
+    var dataRow = rows_agencia[i];
+    var record = {};
+    record['codigo'] = dataRow[0];
+    record['descripcion'] = dataRow[0];
+    dataArrayAgencia.push(record);     
+  }  
+  var categoria ="";
+  var nombre_producto="";
+  var record = {};
+  var dataArray_producto = [];
+  
+  var contador_categoria=0;
+  var sheet_conf =ss.getSheetByName("Configuracion");
+  var moneda = sheet_conf.getRange(8,2).getValue();
+ var record_producto = {};
+  for(var j = 0;j<rows_p.length ; j++){      
+      var dataRow_producto = rows_p[j];
+    
+      if(!dataRow_producto[0] || !dataRow_producto[1] || !dataRow_producto[5]){
+        continue;
+      }      
+      if(dataRow_producto[5]!=categoria){
+        if(categoria){
+          record = {};
+          record['codigo'] =contador_categoria;
+          record['nombre'] =categoria;
+          record['producto'] = dataArray_producto;          
+          dataArray.push(record);       
+          dataArray_producto=[];
+        }
+        categoria=dataRow_producto[5];
+        contador_categoria=contador_categoria+1;
+       }
+       
+    var variedades ={"moneda":moneda,"precio":dataRow_producto[4],"variedad":dataRow_producto[2],"minima":dataRow_producto[7],"sub_variedad":dataRow_producto[3]};
+       if(nombre_producto!=dataRow_producto[0]){
+         record_producto = {};
+         record_producto['codigo'] = (j+1);
+         record_producto['categoria'] = dataRow_producto[5];
+         record_producto['nombre'] = dataRow_producto[0];
+         record_producto['descripcion'] = dataRow_producto[1];
+         record_producto['imagen'] = dataRow_producto[6];
+          var dataArray_variedad = [];
+          dataArray_variedad.push(variedades);
+          record_producto.variedad=dataArray_variedad;
+          dataArray_producto.push(record_producto); 
+          nombre_producto=dataRow_producto[0]; 
+       }else{
+         try{
+           record_producto.variedad.push(variedades);   
+           } catch (e) {
+           }
+       }  
+       
+       if((j+1)==rows_p.length){
+          record = {};
+          record['codigo'] =contador_categoria;
+          record['nombre'] =categoria;
+          record['producto'] = dataArray_producto;          
+          dataArray.push(record);        
+       }
+  }
+        
+  jo.status = '0';
+  jo.message = 'Exito';  
+  jo.pagina_logo = sheet_conf.getRange(1, 2).getValue();
+  jo.pagina_nombre = sheet_conf.getRange(2, 2).getValue();
+  jo.formato_numero = sheet_conf.getRange(9, 2).getValue(); 
+  jo.formato_decimal = sheet_conf.getRange(10, 2).getValue(); 
+  jo.pagina_url = sheet_conf.getRange(3, 2).getValue();
+  jo.pagina_carrusel = JSON.parse(sheet_conf.getRange(4, 2).getValue());
+  jo.contactabilidad = sheet_conf.getRange(7, 2).getValue();
+  jo.content = dataArray;
+  jo.contentagencia = dataArrayAgencia;
+  var result = JSON.stringify(jo); 
+  return result;
+}

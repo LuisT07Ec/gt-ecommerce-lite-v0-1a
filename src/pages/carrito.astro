@@ -1,0 +1,528 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import BottomNav from '../components/BottomNav.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+import ProductDetailModal from '../components/ProductDetailModal.astro';
+import OrderConfirmModal from '../components/OrderConfirmModal.astro';
+import Icon from '../components/Icon.astro';
+import { listarConfiguracion, type CategoriaCatalogo } from '../lib/sheets-service';
+
+const configData = listarConfiguracion();
+const storeName = String(configData.pagina_nombre || 'WIGGER SHOP 2');
+const whatsappNumber = String(configData.contactabilidad || '593992576986');
+const categories = (configData.content || []) as CategoriaCatalogo[];
+---
+
+<BaseLayout
+  title={`Mi Carrito de Compras | ${storeName} — Wigoo Shop EC`}
+  description="Revisa tus productos seleccionados, elige Paso a Retirar ($0.00) o Envío a Domicilio ($1.50) y confirma tu pedido directo por WhatsApp."
+  canonicalPath="/carrito"
+>
+  <Header activePage="carrito" whatsappNumber={whatsappNumber} storeName={storeName} />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-16 space-y-6">
+    <!-- Cart Navigation Header -->
+    <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <a
+          href="/"
+          aria-label="Volver al catálogo principal"
+          class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all shadow-sm active:scale-95"
+        >
+          <Icon name="arrow_back" class="w-5 h-5" />
+        </a>
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Mi Carrito
+            </h1>
+            <span
+              id="cartPageBadgeCount"
+              class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#FF5722]/20 text-[#FF5722] border border-[#FF5722]/30"
+            >
+              0 items
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1 font-medium">
+            Revisa tus productos, verifica las cantidades mínimas y selecciona tu modalidad de entrega
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 self-start sm:self-auto">
+        <button
+          type="button"
+          id="clearCartPageBtn"
+          class="text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20"
+        >
+          <Icon name="delete_sweep" class="w-4 h-4" />
+          <span>Vaciar Carrito</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Toast Notification for Minimum Quantity Rule -->
+    <div
+      id="minQtyAlertBanner"
+      role="status"
+      aria-live="polite"
+      class="hidden p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-xs font-semibold text-amber-200 flex items-center justify-between"
+    >
+      <span id="minQtyAlertText">
+        Este producto tiene una cantidad mínima obligatoria.
+      </span>
+      <button type="button" id="closeMinQtyAlert" class="text-amber-300 hover:text-white font-bold px-2">
+        ✕
+      </button>
+    </div>
+
+    <!-- Active Cart Two-Column Layout -->
+    <div id="activeCartSection" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
+      <!-- Left Column: Items List + Delivery Selector + Wholesale Coupon -->
+      <div class="lg:col-span-7 xl:col-span-8 space-y-5">
+        <!-- Items Container -->
+        <div id="cartPageItemsContainer" class="space-y-3.5">
+          <!-- Renderizado reactivo desde el store -->
+        </div>
+
+        <!-- Delivery Method Selector Card (PRD Sección 2 y 5: PASO RETIRAR $0.00 / ENVÍO A DOMICILIO $1.50) -->
+        <section
+          aria-labelledby="deliverySelectorHeading"
+          class="liquid-glass rounded-2xl p-5 space-y-3.5"
+        >
+          <div class="flex items-center justify-between">
+            <h2 id="deliverySelectorHeading" class="text-sm font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
+              <Icon name="local_shipping" class="w-5 h-5 text-[#FF5722]" />
+              <span>Selecciona la Modalidad de Entrega</span>
+            </h2>
+            <span class="text-[11px] font-bold text-emerald-400">Tarifa Oficial Ecuador</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-labelledby="deliverySelectorHeading">
+            <button
+              type="button"
+              data-shipping-option="PASO RETIRAR"
+              class="shipping-option-card text-left p-4 rounded-2xl transition-all flex items-center justify-between bg-[#FF5722]/15 ring-2 ring-[#FF5722]"
+            >
+              <div class="space-y-0.5">
+                <span class="text-xs font-black text-white block">PASO RETIRAR</span>
+                <span class="text-[11px] text-slate-300 block">Retiro directo en tienda • 15 min</span>
+              </div>
+              <span class="text-base font-black text-emerald-400">$0.00</span>
+            </button>
+
+            <button
+              type="button"
+              data-shipping-option="ENVÍO A DOMICILIO"
+              class="shipping-option-card text-left p-4 rounded-2xl transition-all flex items-center justify-between bg-white/[0.04] border border-white/10 hover:bg-white/[0.08]"
+            >
+              <div class="space-y-0.5">
+                <span class="text-xs font-black text-white block">ENVÍO A DOMICILIO</span>
+                <span class="text-[11px] text-slate-300 block">Entrega rápida puerta a puerta • 35 min</span>
+              </div>
+              <span class="text-base font-black text-[#FF5722]">$1.50</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Wholesale Coupon Card -->
+        <section
+          aria-label="Cupón de descuento mayorista"
+          class="liquid-glass rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-4 justify-between"
+        >
+          <div class="flex items-center gap-3.5 w-full sm:w-auto">
+            <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FF5722] shrink-0">
+              <Icon name="sell" class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider">
+                ¿Tienes un cupón mayorista?
+              </h3>
+              <p class="text-[11px] text-slate-400">
+                Usa <strong class="text-white">WIGOO10</strong> para obtener 10% de descuento en tu lote.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label for="couponCodeInput" class="sr-only">Código de cupón</label>
+            <input
+              id="couponCodeInput"
+              type="text"
+              placeholder="Ej: WIGOO10"
+              class="w-full sm:w-44 px-3.5 py-2.5 text-xs uppercase font-bold rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722]"
+            />
+            <button
+              type="button"
+              id="applyCouponBtn"
+              class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-[#FF5722] text-white text-xs font-bold border border-white/15 hover:border-transparent transition-all shrink-0 active:scale-95"
+            >
+              Aplicar
+            </button>
+          </div>
+        </section>
+
+        <div class="pt-1">
+          <a
+            href="/"
+            class="inline-flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-[#FF5722] transition-colors py-2 px-3 rounded-xl hover:bg-white/5"
+          >
+            <Icon name="west" class="w-4 h-4" />
+            <span>Seguir agregando productos del catálogo</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: Sticky Order Summary Card -->
+      <div class="lg:col-span-5 xl:col-span-4 sticky top-28 space-y-4">
+        <div class="liquid-glass-summary rounded-3xl p-6 sm:p-7 space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-white/10">
+            <h2 class="text-xl font-extrabold text-white tracking-tight">Resumen del Pedido</h2>
+            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/10 text-slate-300 border border-white/10">
+              Ecuador (USD)
+            </span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Subtotal de productos:</span>
+              <span id="summarySubtotalVal" class="font-extrabold text-white text-sm">$0.00</span>
+            </div>
+
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Modalidad de entrega:</span>
+              <span id="summaryDeliveryName" class="font-bold text-emerald-400">PASO RETIRAR (15 min)</span>
+            </div>
+
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Costo de envío:</span>
+              <span id="summaryShippingVal" class="font-extrabold text-[#FF5722] text-sm">$0.00</span>
+            </div>
+
+            <div id="summaryDiscountRow" class="hidden flex items-center justify-between text-emerald-400">
+              <span>Descuento mayorista:</span>
+              <span id="summaryDiscountVal" class="font-bold">-$0.00</span>
+            </div>
+
+            <div class="pt-4 border-t border-white/10 flex items-baseline justify-between">
+              <div>
+                <span class="block text-xs uppercase font-extrabold tracking-wider text-slate-200">
+                  Total a Pagar
+                </span>
+                <span class="text-[11px] text-slate-400">IVA incluido • Moneda USD ($)</span>
+              </div>
+              <div class="text-right">
+                <span id="summaryGrandTotalVal" class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                  $0.00
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary CTA: Open Modal 2 (OrderConfirmModal) -->
+          <button
+            type="button"
+            data-action="open-order-modal"
+            class="w-full py-4 px-6 rounded-2xl bg-[#FF5722] hover:bg-[#e0420f] active:scale-[0.98] text-white font-extrabold text-sm sm:text-base shadow-lg shadow-orange-950/60 flex items-center justify-center gap-2.5 transition-all group"
+          >
+            <span>Confirmar Pedido</span>
+            <Icon name="arrow_forward" class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
+
+          <p class="text-[11px] text-center text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+            <Icon name="lock" class="w-4 h-4 text-emerald-400" />
+            <span>Confirmación directa y segura por WhatsApp</span>
+          </p>
+
+          <!-- Trust Guarantees -->
+          <div class="rounded-2xl p-4 space-y-3 bg-white/[0.03] border border-white/5">
+            <div class="flex items-start gap-3">
+              <div class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#FF5722] shrink-0">
+                <Icon name="verified_user" class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white">Compra 100% Protegida</h3>
+                <p class="text-[10px] text-slate-400 leading-tight mt-0.5">
+                  Verificación previa de lote y empaque reforzado anti-golpes.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0">
+                <Icon name="support_agent" class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-white">Atención Directa por WhatsApp</h3>
+                <p class="text-[10px] text-slate-400 leading-tight mt-0.5">
+                  Asesor asignado en tiempo real al +{whatsappNumber}.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="liquid-glass rounded-2xl p-4 flex items-center justify-between text-xs text-slate-300">
+          <div class="flex items-center gap-2">
+            <Icon name="inventory_2" class="w-4 h-4 text-[#FF5722]" />
+            <span>Unidades totales en el pedido:</span>
+          </div>
+          <span id="statTotalUnits" class="font-extrabold text-white">0 unidades</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty Cart State View -->
+    <div
+      id="emptyCartPageView"
+      class="hidden flex-col items-center justify-center py-16 text-center max-w-md mx-auto space-y-4 liquid-glass rounded-3xl p-8"
+    >
+      <div class="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 mx-auto">
+        <Icon name="remove_shopping_cart" class="w-10 h-10" />
+      </div>
+      <div class="space-y-1">
+        <h2 class="text-2xl font-extrabold text-white">Tu carrito está vacío</h2>
+        <p class="text-xs text-slate-400">
+          Aún no has agregado productos a tu pedido. Explora nuestro catálogo con precios mayoristas en Ecuador.
+        </p>
+      </div>
+      <a
+        href="/"
+        class="px-6 py-3 rounded-xl bg-[#FF5722] hover:bg-[#e0420f] text-white text-xs font-bold shadow-lg shadow-orange-950/60 transition-all inline-block mt-2"
+      >
+        Ir al Catálogo de Productos
+      </a>
+    </div>
+  </main>
+
+  <CartDrawer />
+  <ProductDetailModal />
+  <OrderConfirmModal />
+  <FloatingWhatsApp whatsappNumber={whatsappNumber} />
+  <BottomNav activePage="carrito" whatsappNumber={whatsappNumber} />
+
+  <script
+    id="wigooCatalogData"
+    type="application/json"
+    set:html={JSON.stringify(categories)}
+  />
+
+  <script>
+    import {
+      initStorefront,
+      getCart,
+      saveCart,
+      updateCartItemQty,
+      removeCartItem,
+      clearCart,
+      setShippingMethod,
+      formatMoney,
+    } from '../scripts/store';
+
+    const rawCatalog = document.getElementById('wigooCatalogData')?.textContent || '[]';
+    initStorefront(JSON.parse(rawCatalog));
+
+    const containerEl = document.getElementById('cartPageItemsContainer');
+    const activeSection = document.getElementById('activeCartSection');
+    const emptyView = document.getElementById('emptyCartPageView');
+    const badgeCountEl = document.getElementById('cartPageBadgeCount');
+    const subValEl = document.getElementById('summarySubtotalVal');
+    const delivNameEl = document.getElementById('summaryDeliveryName');
+    const shipValEl = document.getElementById('summaryShippingVal');
+    const discRowEl = document.getElementById('summaryDiscountRow');
+    const discValEl = document.getElementById('summaryDiscountVal');
+    const grandTotalEl = document.getElementById('summaryGrandTotalVal');
+    const statUnitsEl = document.getElementById('statTotalUnits');
+    const minAlertBanner = document.getElementById('minQtyAlertBanner');
+    const minAlertText = document.getElementById('minQtyAlertText');
+    const shippingCards = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('[data-shipping-option]')
+    );
+
+    function showMinQtyWarning(minima: number, nombre: string) {
+      if (!minAlertBanner || !minAlertText) return;
+      minAlertText.textContent = `La cantidad mínima para "${nombre}" es de ${minima} unidad(es). Si deseas quitarlo, usa el botón de eliminar.`;
+      minAlertBanner.classList.remove('hidden');
+    }
+
+    document.getElementById('closeMinQtyAlert')?.addEventListener('click', () => {
+      minAlertBanner?.classList.add('hidden');
+    });
+
+    function renderCartPage() {
+      const cart = getCart();
+      const totalUnits = cart.detalle.reduce((sum, i) => sum + i.cantidad, 0);
+
+      if (badgeCountEl) {
+        badgeCountEl.textContent = `${totalUnits} item${totalUnits === 1 ? '' : 's'}`;
+      }
+
+      if (cart.detalle.length === 0) {
+        activeSection?.classList.add('hidden');
+        emptyView?.classList.remove('hidden');
+        emptyView?.classList.add('flex');
+        return;
+      }
+
+      activeSection?.classList.remove('hidden');
+      emptyView?.classList.add('hidden');
+      emptyView?.classList.remove('flex');
+
+      if (subValEl) subValEl.textContent = `$${formatMoney(cart.subtotal || 0)}`;
+      if (delivNameEl) {
+        delivNameEl.textContent = `${cart.agencia_entrega} (${cart.tiempo_entrega || '15 min'})`;
+      }
+      if (shipValEl) shipValEl.textContent = `$${formatMoney(cart.costo_envio || 0)}`;
+
+      if (discRowEl && discValEl) {
+        if ((cart.descuento || 0) > 0) {
+          discRowEl.classList.remove('hidden');
+          discValEl.textContent = `-$${formatMoney(cart.descuento || 0)}`;
+        } else {
+          discRowEl.classList.add('hidden');
+        }
+      }
+
+      if (grandTotalEl) grandTotalEl.textContent = `$${formatMoney(cart.total)}`;
+      if (statUnitsEl) statUnitsEl.textContent = `${totalUnits} unidad(es)`;
+
+      // Highlight selected shipping option card
+      shippingCards.forEach((btn) => {
+        const isCurrent = btn.dataset.shippingOption === cart.agencia_entrega;
+        btn.className = isCurrent
+          ? 'shipping-option-card text-left p-4 rounded-2xl transition-all flex items-center justify-between bg-[#FF5722]/15 ring-2 ring-[#FF5722]'
+          : 'shipping-option-card text-left p-4 rounded-2xl transition-all flex items-center justify-between bg-white/[0.04] border border-white/10 hover:bg-white/[0.08]';
+      });
+
+      if (containerEl) {
+        containerEl.innerHTML = cart.detalle
+          .map(
+            (item) => `
+          <article class="liquid-glass rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
+            <div class="flex items-center gap-4 min-w-0">
+              <div class="w-20 h-20 rounded-xl bg-[#181a22] shrink-0 flex items-center justify-center border border-white/10 relative overflow-hidden p-1.5">
+                <img
+                  src="${item.imagen}"
+                  alt="${item.nombre}"
+                  width="80"
+                  height="80"
+                  loading="lazy"
+                  class="w-full h-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <div class="min-w-0 space-y-0.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-[#FF5722]">${item.categoria}</span>
+                  <span class="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-bold text-slate-300">Cantidad Mínima: ${item.minima}</span>
+                </div>
+                <h2 class="text-sm sm:text-base font-bold text-white truncate group-hover:text-[#FF5722] transition-colors">
+                  ${item.nombre}
+                </h2>
+                <div class="flex items-center gap-2 text-xs text-slate-400">
+                  <span>Precio unitario:</span>
+                  <span class="font-bold text-white">$${formatMoney(item.precio)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between sm:justify-end gap-5 pt-3 sm:pt-0 border-t sm:border-0 border-white/5">
+              <!-- Quantity Stepper -->
+              <div class="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 shadow-inner">
+                <button
+                  type="button"
+                  data-page-qty-key="${item.key_completo}"
+                  data-page-qty-name="${item.nombre}"
+                  data-page-qty-delta="-1"
+                  aria-label="Disminuir cantidad"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-90 font-bold transition-all"
+                >
+                  −
+                </button>
+                <span class="w-9 text-center text-xs font-extrabold text-white">${item.cantidad}</span>
+                <button
+                  type="button"
+                  data-page-qty-key="${item.key_completo}"
+                  data-page-qty-name="${item.nombre}"
+                  data-page-qty-delta="1"
+                  aria-label="Aumentar cantidad"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-90 font-bold transition-all"
+                >
+                  +
+                </button>
+              </div>
+
+              <!-- Subtotal & Delete -->
+              <div class="text-right min-w-[76px]">
+                <span class="block text-[10px] uppercase font-bold text-slate-400">Subtotal</span>
+                <span class="text-base sm:text-lg font-black text-[#FF5722] tracking-tight">$${formatMoney(item.total)}</span>
+              </div>
+
+              <button
+                type="button"
+                data-page-remove-key="${item.key_completo}"
+                aria-label="Eliminar este ítem del carrito"
+                class="w-9 h-9 rounded-xl bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-white/10 flex items-center justify-center transition-colors active:scale-95"
+              >
+                ✕
+              </button>
+            </div>
+          </article>
+        `
+          )
+          .join('');
+
+        containerEl.querySelectorAll<HTMLButtonElement>('[data-page-qty-key]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const key = btn.dataset.pageQtyKey || '';
+            const name = btn.dataset.pageQtyName || 'Producto';
+            const delta = Number(btn.dataset.pageQtyDelta) || 0;
+            const res = updateCartItemQty(key, delta);
+            if (res.hitMin) {
+              showMinQtyWarning(res.minima, name);
+            }
+          });
+        });
+
+        containerEl
+          .querySelectorAll<HTMLButtonElement>('[data-page-remove-key]')
+          .forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const key = btn.dataset.pageRemoveKey || '';
+              removeCartItem(key);
+            });
+          });
+      }
+    }
+
+    shippingCards.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const agencia = btn.dataset.shippingOption || 'PASO RETIRAR';
+        setShippingMethod(agencia);
+      });
+    });
+
+    document.getElementById('clearCartPageBtn')?.addEventListener('click', () => {
+      clearCart();
+    });
+
+    document.getElementById('applyCouponBtn')?.addEventListener('click', () => {
+      const input = document.getElementById('couponCodeInput') as HTMLInputElement | null;
+      const code = input?.value.trim().toUpperCase() || '';
+      const cart = getCart();
+      if (code === 'WIGOO10' || code === 'MAYORISTA') {
+        cart.descuento = Number(((cart.subtotal || 0) * 0.1).toFixed(2));
+        saveCart(cart);
+      } else {
+        cart.descuento = 0;
+        saveCart(cart);
+        alert('Cupón no válido. Usa el código WIGOO10 para un 10% de descuento mayorista.');
+      }
+    });
+
+    window.addEventListener('wigoo:cart-updated', renderCartPage);
+    renderCartPage();
+  </script>
+</BaseLayout>
+

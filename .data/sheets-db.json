@@ -1,0 +1,50 @@
+{
+  "ventas": [
+    {
+      "codigo": "WIG-9482-UUID-2025",
+      "fecha": "2025-05-15",
+      "hora": "14:30:00",
+      "nombre": "Juan Pérez",
+      "documento": "1723490812",
+      "telefono": "0962888777",
+      "correo": "juan.perez@ejemplo.com",
+      "direccion": "Av. Amazonas N24-11 y Cordero, Edificio Sky, Depto 402 — Quito",
+      "agencia": "ENVÍO A DOMICILIO",
+      "forma_pago": "Transferencia",
+      "moneda": "$",
+      "subtotal": 40,
+      "costo_agencia": 1.5,
+      "tiempo_agencia": "35 min",
+      "total": 41.5,
+      "estado": "SOLICITADO",
+      "json_raw": "{\"op\":\"venta\",\"idpedido\":\"WIG-9482-UUID-2025\",\"nombre_entrega\":\"Juan Pérez\",\"rut_entrega\":\"1723490812\",\"telefono_entrega\":\"0962888777\",\"correo_entrega\":\"juan.perez@ejemplo.com\",\"direccion_entrega\":\"Av. Amazonas N24-11 y Cordero, Edificio Sky, Depto 402 — Quito\",\"agencia_entrega\":\"ENVÍO A DOMICILIO\",\"forma_pago\":\"Transferencia\",\"moneda\":\"$\",\"subtotal\":40,\"costo_envio\":1.5,\"total\":41.5,\"tiempo_entrega\":\"35 min\",\"fecha\":\"2025-05-15\",\"hora\":\"14:30:00\",\"estado\":\"SOLICITADO\",\"detalle\":[{\"codigo\":1,\"nombre\":\"Buzz Lightyear ( 1 Docena - 20cm )\",\"categoria\":\"DISNEY\",\"variante\":\"1 Docena - 20cm\",\"precio\":10,\"cantidad\":2,\"minima\":1,\"moneda\":\"$\",\"imagen\":\"/fotos/buzz-lightyear.svg\",\"total\":20},{\"codigo\":4,\"nombre\":\"Capitán América Manos ( 1 Docena - 20cm )\",\"categoria\":\"OFERTAS\",\"variante\":\"1 Docena - 20cm\",\"precio\":10,\"cantidad\":1,\"minima\":1,\"moneda\":\"$\",\"imagen\":\"/fotos/capitan-america-manos.svg\",\"total\":10},{\"codigo\":2,\"nombre\":\"Minnie Fucsia ( 1 Docena - 20cm )\",\"categoria\":\"DISNEY\",\"variante\":\"1 Docena - 20cm\",\"precio\":10,\"cantidad\":1,\"minima\":1,\"moneda\":\"$\",\"imagen\":\"/fotos/minnie-fucsia.svg\",\"total\":10}]}",
+      "backup_edicion": ""
+    }
+  ],
+  "detalleVentas": [
+    {
+      "id_venta": "WIG-9482-UUID-2025",
+      "producto": "Buzz Lightyear ( 1 Docena - 20cm )",
+      "categoria": "DISNEY",
+      "cantidad": 2,
+      "precio": 10,
+      "subtotal": 20
+    },
+    {
+      "id_venta": "WIG-9482-UUID-2025",
+      "producto": "Capitán América Manos ( 1 Docena - 20cm )",
+      "categoria": "OFERTAS",
+      "cantidad": 1,
+      "precio": 10,
+      "subtotal": 10
+    },
+    {
+      "id_venta": "WIG-9482-UUID-2025",
+      "producto": "Minnie Fucsia ( 1 Docena - 20cm )",
+      "categoria": "DISNEY",
+      "cantidad": 1,
+      "precio": 10,
+      "subtotal": 10
+    }
+  ]
+}

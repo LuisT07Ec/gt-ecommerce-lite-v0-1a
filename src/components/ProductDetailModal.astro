@@ -1,0 +1,218 @@
+---
+import Icon from './Icon.astro';
+---
+
+<dialog
+  id="productDetailDialog"
+  closedby="any"
+  aria-labelledby="modalProductTitle"
+  class="w-full max-w-5xl bg-transparent p-0 m-auto rounded-3xl text-slate-100 open:flex open:flex-col backdrop:bg-[#08090C]/85 backdrop:backdrop-blur-xl"
+>
+  <div class="relative w-full liquid-glass-l2 rounded-3xl overflow-hidden flex flex-col max-h-[92vh]">
+    <!-- Top Warm Sienna / Orange Specular Rim -->
+    <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#FF5722] to-transparent opacity-90 z-20"></div>
+
+    <!-- Modal Header Bar -->
+    <div class="relative z-10 px-5 sm:px-8 py-4 flex items-center justify-between bg-[#12141A]/90 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest bg-[#FF5722]/15 text-[#FF5722] flex items-center gap-1.5 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FF5722] animate-pulse"></span>
+          <span id="modalProductCategoryBadge">COLECCIÓN DISNEY</span>
+        </span>
+        <span id="modalProductRef" class="hidden sm:inline-flex items-center text-xs text-slate-400 font-medium">
+          Ref: WG-2025-EC
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          id="closeProductModalBtn"
+          aria-label="Cerrar detalle de producto"
+          class="w-10 h-10 rounded-xl bg-white/5 hover:bg-rose-500/20 active:scale-90 flex items-center justify-center text-slate-300 hover:text-white transition-all"
+        >
+          <Icon name="close" class="w-5 h-5" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body: 2 Columns Architecture -->
+    <div class="overflow-y-auto px-5 sm:px-8 py-6 flex-1 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-8">
+      <!-- Left Column: Product Imagery & Thumbnail Track (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-3.5">
+        <div class="relative aspect-square w-full rounded-2xl bg-gradient-to-b from-[#1F222D] to-[#12141A] overflow-hidden flex items-center justify-center shadow-inner border border-white/10 group">
+          <img
+            id="modalMainProductImg"
+            src="/fotos/buzz-lightyear.svg"
+            alt="Vista principal del producto"
+            width="500"
+            height="500"
+            fetchpriority="low"
+            class="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
+          />
+          <div class="absolute top-3 left-3 px-3 py-1 rounded-lg bg-[#0D0E12]/85 backdrop-blur-md text-emerald-400 text-[11px] font-extrabold flex items-center gap-1.5 shadow-lg border border-emerald-500/20">
+            <Icon name="verified" class="w-4 h-4 text-emerald-400" />
+            <span>En Stock / Despacho Inmediato</span>
+          </div>
+        </div>
+
+        <!-- Thumbnail Ribbon -->
+        <div id="modalThumbnailsContainer" class="flex items-center gap-2.5 overflow-x-auto pb-1 select-none">
+          <!-- Renderizado dinámico de miniaturas desde public/fotos/ -->
+        </div>
+
+        <!-- Trust Highlights -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div class="bg-white/[0.03] border border-white/5 p-3 rounded-xl flex items-center gap-2.5">
+            <Icon name="shield_with_heart" class="w-5 h-5 text-[#FF5722] shrink-0" />
+            <div class="flex flex-col">
+              <span class="text-[11px] font-bold text-white leading-tight">Calidad Garantizada</span>
+              <span class="text-[10px] text-slate-400">Hipoalergénico Premium</span>
+            </div>
+          </div>
+          <div class="bg-white/[0.03] border border-white/5 p-3 rounded-xl flex items-center gap-2.5">
+            <Icon name="local_shipping" class="w-5 h-5 text-emerald-400 shrink-0" />
+            <div class="flex flex-col">
+              <span class="text-[11px] font-bold text-white leading-tight">Envío Express</span>
+              <span class="text-[10px] text-slate-400">Retiro 15m / Domicilio 35m</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Specifications & Variant Selection (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col justify-between space-y-5">
+        <div class="space-y-2">
+          <h2 id="modalProductTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+            Buzz Lightyear
+          </h2>
+          <p id="modalProductDescription" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Figura y peluche espacial coleccionable de 20cm con acabados de lujo.
+          </p>
+          <div class="flex flex-wrap items-center gap-2.5 pt-1">
+            <div class="flex items-center text-amber-400 gap-0.5">
+              <Icon name="star" class="w-4 h-4" />
+              <Icon name="star" class="w-4 h-4" />
+              <Icon name="star" class="w-4 h-4" />
+              <Icon name="star" class="w-4 h-4" />
+              <Icon name="star" class="w-4 h-4" />
+              <span class="ml-1 text-xs font-black text-white">4.9</span>
+            </div>
+            <span class="text-slate-600 text-xs">•</span>
+            <span class="text-xs font-medium text-slate-300">Calidad Verificada en Ecuador</span>
+            <span id="modalMinQtyBadge" class="text-[11px] font-bold text-[#FF5722] bg-[#FF5722]/15 border border-[#FF5722]/30 px-2.5 py-0.5 rounded-full">
+              Cantidad Mínima: 1
+            </span>
+          </div>
+        </div>
+
+        <!-- Dynamic Pricing Module -->
+        <div class="bg-gradient-to-r from-white/[0.06] via-white/[0.03] to-transparent p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+          <div>
+            <span id="modalSelectedVariantLabel" class="text-[11px] uppercase font-bold tracking-wider text-slate-400 block">
+              Presentación Seleccionada
+            </span>
+            <div class="flex items-baseline gap-2.5 mt-0.5">
+              <span id="modalActivePriceDisplay" class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                $10.00
+              </span>
+              <span id="modalOriginalPriceDisplay" class="text-sm font-semibold text-slate-400 line-through">
+                $18.00
+              </span>
+              <span id="modalDiscountBadge" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-xs font-extrabold">
+                Mayorista
+              </span>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="inline-flex items-center gap-1 text-[11px] font-black text-[#FF5722] uppercase tracking-wide bg-[#FF5722]/10 px-3 py-1.5 rounded-xl">
+              <Icon name="savings" class="w-4 h-4" /> Precio Directo
+            </span>
+            <p class="text-[10px] text-slate-400 mt-1">IVA incluido • WIGGER SHOP 2</p>
+          </div>
+        </div>
+
+        <!-- Selector 1: Variedades (Presentación / Empaque) -->
+        <div class="space-y-2">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+            <Icon name="inventory_2" class="w-4 h-4 text-[#FF5722]" />
+            <span>1. Selecciona la Variedad / Presentación:</span>
+          </span>
+          <div id="modalVariantsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Tarjetas de variedades dinámicas -->
+          </div>
+        </div>
+
+        <!-- Selector 2: Sub-Variedades (Variedades2: Tallas / Colores / Acabados) -->
+        <div id="modalSubVariantsSection" class="space-y-2">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+            <Icon name="tune" class="w-4 h-4 text-[#FF5722]" />
+            <span>2. Selecciona Talla / Color / Sub-variedad:</span>
+          </span>
+          <div id="modalSubVariantsList" class="flex flex-wrap gap-2">
+            <!-- Chips de sub-variedades dinámicos -->
+          </div>
+        </div>
+
+        <!-- Quantity Stepper (Respetando Cantidad Mínima) -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+          <div class="flex items-center justify-between bg-white/[0.05] border border-white/10 p-1.5 rounded-xl sm:w-56">
+            <span class="text-xs font-bold text-slate-300 pl-3">Cantidad:</span>
+            <div class="flex items-center gap-1">
+              <button
+                type="button"
+                id="modalQtyMinusBtn"
+                aria-label="Disminuir cantidad"
+                class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 active:scale-90 flex items-center justify-center text-white font-bold transition-all"
+              >
+                <Icon name="remove" class="w-4 h-4" />
+              </button>
+              <span id="modalQuantityValue" class="w-10 text-center text-sm font-black text-white">
+                1
+              </span>
+              <button
+                type="button"
+                id="modalQtyPlusBtn"
+                aria-label="Aumentar cantidad"
+                class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 active:scale-90 flex items-center justify-center text-white font-bold transition-all"
+              >
+                <Icon name="add" class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 text-[11px] text-slate-300 font-medium">
+            <span class="flex items-center gap-1">
+              <Icon name="payments" class="w-4 h-4 text-[#FF5722]" /> Efectivo / Transferencia / TC
+            </span>
+            <span class="flex items-center gap-1">
+              <Icon name="lock" class="w-4 h-4 text-emerald-400" /> Compra Segura
+            </span>
+          </div>
+        </div>
+
+        <!-- Direct CTA Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <button
+            type="button"
+            id="modalAddToCartBtn"
+            class="py-3.5 px-5 rounded-2xl bg-[#FF5722] hover:bg-[#e0420f] active:scale-[0.98] text-white font-extrabold text-sm tracking-wide shadow-xl shadow-orange-950/70 flex items-center justify-center gap-2 transition-all"
+          >
+            <Icon name="add_shopping_cart" class="w-5 h-5" />
+            <span>Agregar al Carrito (<span id="modalCtaTotalPrice">$10.00</span>)</span>
+          </button>
+
+          <button
+            type="button"
+            id="modalBuyNowBtn"
+            class="py-3.5 px-5 rounded-2xl bg-[#25D366] hover:bg-[#1ea952] active:scale-[0.98] text-white font-extrabold text-sm tracking-wide shadow-xl shadow-green-950/70 flex items-center justify-center gap-2 transition-all"
+          >
+            <Icon name="whatsapp" class="w-5 h-5" />
+            <span>Pedir Ahora por WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+

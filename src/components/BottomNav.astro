@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  activePage?: 'catalogo' | 'carrito' | 'confirmado';
+  whatsappNumber?: string;
+}
+
+const { activePage = 'catalogo', whatsappNumber = '593992576986' } = Astro.props;
+---
+
+<nav
+  aria-label="Navegación móvil inferior"
+  class="fixed bottom-0 inset-x-0 z-40 bg-[#0D0E12]/95 backdrop-blur-2xl border-t border-white/10 px-6 py-2 pb-safe flex items-center justify-around max-w-lg mx-auto sm:rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.65)]"
+>
+  <a
+    href="/"
+    aria-current={activePage === 'catalogo' ? 'page' : undefined}
+    class:list={[
+      'flex flex-col items-center justify-center gap-1 min-w-[48px] min-h-[44px] transition-colors',
+      activePage === 'catalogo' ? 'text-[#FF5722] font-bold' : 'text-slate-400 hover:text-white',
+    ]}
+  >
+    <Icon name="home" class="w-5 h-5" />
+    <span class="text-[10px]">Inicio</span>
+  </a>
+
+  <button
+    type="button"
+    data-action="focus-search"
+    class="flex flex-col items-center justify-center gap-1 min-w-[48px] min-h-[44px] text-slate-400 hover:text-white transition-colors"
+  >
+    <Icon name="search" class="w-5 h-5" />
+    <span class="text-[10px] font-medium">Buscar</span>
+  </button>
+
+  <a
+    href="/carrito"
+    aria-current={activePage === 'carrito' ? 'page' : undefined}
+    class:list={[
+      'flex flex-col items-center justify-center gap-1 min-w-[48px] min-h-[44px] transition-colors relative',
+      activePage === 'carrito' ? 'text-[#FF5722] font-bold' : 'text-slate-400 hover:text-white',
+    ]}
+  >
+    <div class="relative flex items-center justify-center">
+      <Icon name="shopping_cart" class="w-5 h-5" />
+      <span
+        id="bottomNavBadge"
+        class="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-[#FF5722] text-white text-[9px] font-black flex items-center justify-center"
+      >
+        0
+      </span>
+    </div>
+    <span class="text-[10px]">Carrito</span>
+  </a>
+
+  <a
+    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hola WIGGER SHOP 2, necesito asesoría con mi compra.')}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="flex flex-col items-center justify-center gap-1 min-w-[48px] min-h-[44px] text-slate-400 hover:text-white transition-colors"
+  >
+    <Icon name="support_agent" class="w-5 h-5" />
+    <span class="text-[10px] font-medium">Contacto</span>
+  </a>
+</nav>
+

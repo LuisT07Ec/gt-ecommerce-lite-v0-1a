@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="wigooGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5722" />
+      <stop offset="100%" stop-color="#FD6C00" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#0D0E13" />
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#wigooGrad)" fill-opacity="0.14" stroke="#FF5722" stroke-opacity="0.45" stroke-width="2" />
+  <path d="M14 20L22 44L32 26L42 44L50 20" fill="none" stroke="url(#wigooGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+

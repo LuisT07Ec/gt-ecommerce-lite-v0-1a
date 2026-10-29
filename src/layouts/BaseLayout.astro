@@ -1,0 +1,106 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  ogImage?: string;
+}
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://wigooshop.ec';
+const storeName = import.meta.env.PUBLIC_STORE_NAME || 'WIGGER SHOP 2';
+const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER || '593992576986';
+
+const {
+  title = `${storeName} | Wigoo Shop EC — Catálogo Mayorista y Pedidos Directos`,
+  description = 'Tienda en línea oficial Wigoo Shop EC (WIGGER SHOP 2). Catálogo de peluches, juguetes Disney, ofertas e infantil por docena y unidad con envíos a todo el Ecuador.',
+  canonicalPath = Astro.url.pathname,
+  ogImage = '/fotos/banner-mayorista-1.svg',
+} = Astro.props;
+
+const canonicalURL = new URL(canonicalPath, siteUrl).toString();
+const fullOgImage = new URL(ogImage, siteUrl).toString();
+
+// Marcado de Datos Estructurados Schema.org (Store / LocalBusiness) - PRD Sección 3
+const schemaOrgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': ['Store', 'LocalBusiness'],
+  name: `${storeName} — Wigoo Shop EC`,
+  description,
+  url: siteUrl,
+  logo: new URL('/fotos/logo-wigoo.svg', siteUrl).toString(),
+  image: fullOgImage,
+  telephone: `+${whatsappNumber}`,
+  priceRange: '$$',
+  currenciesAccepted: 'USD',
+  paymentAccepted: 'Efectivo, Transferencia Bancaria, Tarjeta de Crédito',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Av. Amazonas y Cordero, Bodega Matriz',
+    addressLocality: 'Quito',
+    addressRegion: 'Pichincha',
+    postalCode: '170515',
+    addressCountry: 'EC',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: -0.180653,
+    longitude: -78.467834,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ],
+      opens: '08:00',
+      closes: '20:00',
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html class="dark" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#08090C" />
+
+    <!-- Open Graph / Social Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_EC" />
+    <meta property="og:site_name" content={storeName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={fullOgImage} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={fullOgImage} />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaOrgJsonLd)} />
+  </head>
+  <body class="bg-[#08090C] text-slate-100 min-h-screen font-sans selection:bg-[#FF5722] selection:text-white pb-24 md:pb-12 antialiased relative overflow-x-hidden">
+    <!-- Ambient Obsidian Glows -->
+    <div class="fixed top-20 left-1/4 w-96 h-96 bg-[#FF5722]/5 rounded-full blur-3xl pointer-events-none -z-10" aria-hidden="true"></div>
+    <div class="fixed bottom-20 right-1/4 w-96 h-96 bg-[#FF5722]/5 rounded-full blur-3xl pointer-events-none -z-10" aria-hidden="true"></div>
+
+    <slot />
+  </body>
+</html>
+

@@ -1,0 +1,430 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import BottomNav from '../components/BottomNav.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+import CartDrawer from '../components/CartDrawer.astro';
+import ProductDetailModal from '../components/ProductDetailModal.astro';
+import OrderConfirmModal from '../components/OrderConfirmModal.astro';
+import Icon from '../components/Icon.astro';
+import {
+  listarConfiguracion,
+  cargarVenta,
+  formatomonto,
+  type CategoriaCatalogo,
+} from '../lib/sheets-service';
+
+const configData = listarConfiguracion();
+const storeName = String(configData.pagina_nombre || 'WIGGER SHOP 2');
+const whatsappNumber = String(configData.contactabilidad || '593992576986');
+const categories = (configData.content || []) as CategoriaCatalogo[];
+
+const orderIdParam = Astro.url.searchParams.get('id') || 'WIG-9482-UUID-2025';
+const opParam = Astro.url.searchParams.get('o') || '';
+const loadedOrderResult = cargarVenta(orderIdParam);
+const fallbackDemo = cargarVenta('WIG-9482-UUID-2025');
+const order = loadedOrderResult.pedido || fallbackDemo.pedido!;
+
+const subtotalAmount = order.subtotal ?? order.total;
+const shippingCost = order.costo_envio ?? (order.agencia_entrega === 'ENVÍO A DOMICILIO' ? 1.5 : 0.0);
+const deliveryTime = order.tiempo_entrega || (order.agencia_entrega === 'ENVÍO A DOMICILIO' ? '35 min' : '15 min');
+
+const whatsappMessage =
+  `🛍️ *CONFIRMACIÓN DE PEDIDO — ${storeName}*\n` +
+  `🔖 *Código UUID:* ${order.idpedido}\n` +
+  `👤 *Cliente:* ${order.nombre_entrega}\n` +
+  `🪪 *Documento:* ${order.rut_entrega}\n` +
+  `📱 *Teléfono:* ${order.telefono_entrega}\n` +
+  `📍 *Dirección:* ${order.direccion_entrega}\n` +
+  `🚚 *Entrega:* ${order.agencia_entrega} ($${formatomonto(shippingCost)} • ${deliveryTime})\n` +
+  `💳 *Forma de Pago:* ${order.forma_pago || 'Transferencia'}\n` +
+  `💰 *Total Pedido:* $${formatomonto(order.total)}`;
+
+const whatsappDirectUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+---
+
+<BaseLayout
+  title={`Pedido Confirmado #${order.idpedido} | ${storeName}`}
+  description="Resumen de tu orden con código único UUID e instrucciones de seguimiento por WhatsApp."
+  canonicalPath="/pedido-confirmado"
+>
+  <Header activePage="confirmado" whatsappNumber={whatsappNumber} storeName={storeName} />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-16 space-y-6">
+    <div class="relative w-full max-w-5xl mx-auto">
+      <!-- Ambient Celebration Glows -->
+      <div class="absolute top-6 left-1/2 -translate-x-1/2 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+
+      <!-- MAIN HERO / SUCCESS BADGE CARD -->
+      <section class="relative liquid-glass-l2 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center text-center">
+        <!-- Glowing Liquid Glass Check Circle -->
+        <div class="relative flex items-center justify-center mb-5">
+          <div class="absolute w-24 h-24 rounded-full bg-emerald-500/20 animate-ping opacity-60"></div>
+          <div class="relative w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center shadow-lg shadow-emerald-950/80 p-4">
+            <Icon name="check_circle" class="w-10 h-10" />
+          </div>
+        </div>
+
+        <!-- Status Pill -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 mb-3">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="orderStatusBadge" class="text-xs font-extrabold uppercase tracking-widest text-emerald-300">
+            Orden Confirmada con Éxito ({order.estado || 'SOLICITADO'})
+          </span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white mb-2 leading-tight">
+          ¡Gracias por tu compra!
+        </h1>
+
+        <p class="text-sm sm:text-base text-slate-300 max-w-xl">
+          Tu pedido con código único UUID{' '}
+          <span id="orderUuidCode" class="font-mono font-bold text-[#ffb5a0] bg-white/10 px-2.5 py-0.5 rounded-md border border-white/10">
+            {order.idpedido}
+          </span>{' '}
+          ha sido registrado en nuestro sistema.
+        </p>
+
+        <!-- Admin / Payment Confirmation Button (?o=p) -->
+        {opParam === 'p' && (
+          <div class="mt-4">
+            <button
+              type="button"
+              id="markOrderPaidBtn"
+              data-order-id={order.idpedido}
+              class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-black font-black text-xs uppercase tracking-wider shadow-lg transition-all"
+            >
+              Confirmar Pago de Orden (Marcar PAGADO)
+            </button>
+          </div>
+        )}
+
+        <!-- WHATSAPP FAST-TRACK NOTIFICATION BANNER -->
+        <div class="w-full max-w-2xl mt-7 rounded-2xl bg-gradient-to-r from-emerald-950/75 via-[#12141A] to-emerald-950/75 border border-emerald-500/25 p-5 sm:p-6 text-left shadow-xl">
+          <div class="flex items-start sm:items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <Icon name="whatsapp" class="w-7 h-7" />
+            </div>
+            <div class="flex-1">
+              <h2 class="text-sm sm:text-base font-bold text-white leading-tight">
+                Tu orden está lista para seguimiento por WhatsApp
+              </h2>
+              <p class="text-xs text-slate-300 mt-0.5">
+                Si la ventana de WhatsApp no se abrió automáticamente, presiona el botón inferior para conversar con nuestro asesor al +{whatsappNumber}.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a
+              id="whatsappOrderDirectLink"
+              href={whatsappDirectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex-1 py-3 px-5 rounded-xl bg-[#25D366] hover:bg-[#1ea952] active:scale-[0.98] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/80 transition-all"
+            >
+              <Icon name="whatsapp" class="w-5 h-5" />
+              <span>Abrir WhatsApp con mi Pedido</span>
+            </a>
+
+            <button
+              type="button"
+              id="copyWhatsappMsgBtn"
+              class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-bold text-slate-200 flex items-center justify-center gap-1.5 transition-all"
+            >
+              <Icon name="content_copy" class="w-4 h-4" />
+              <span id="copyBtnLabel">Copiar Resumen</span>
+            </button>
+          </div>
+
+          <pre
+            id="whatsappFormattedPreview"
+            class="mt-3.5 bg-black/50 rounded-xl p-3 text-[11px] font-mono text-emerald-300/90 leading-relaxed overflow-x-auto whitespace-pre-wrap"
+          >{whatsappMessage}</pre>
+        </div>
+      </section>
+
+      <!-- DETAILS & LOGISTICS GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
+        <!-- LEFT COLUMN: RECIPIENT & ITEMS LIST (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Recipient & Delivery Card -->
+          <section class="liquid-glass rounded-3xl p-6 sm:p-7 shadow-lg">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <Icon name="local_shipping" class="w-6 h-6 text-[#FF5722]" />
+                <h2 class="text-lg font-bold text-white tracking-tight">Datos de Despacho</h2>
+              </div>
+              <span
+                id="orderDeliveryBadge"
+                class="text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+              >
+                {order.agencia_entrega} • {deliveryTime}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
+                  Destinatario
+                </span>
+                <span id="orderRecipientName" class="text-sm font-bold text-white mt-0.5 block">
+                  {order.nombre_entrega}
+                </span>
+                <span id="orderRecipientDoc" class="text-xs text-slate-300">
+                  Documento: {order.rut_entrega}
+                </span>
+              </div>
+
+              <div class="p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
+                  Contacto y Pago
+                </span>
+                <span id="orderRecipientPhone" class="text-sm font-bold text-white mt-0.5 block">
+                  {order.telefono_entrega}
+                </span>
+                <span id="orderRecipientEmailAndPay" class="text-xs text-slate-300">
+                  {order.correo_entrega} • Pago: {order.forma_pago || 'Transferencia'}
+                </span>
+              </div>
+
+              <div class="sm:col-span-2 p-3.5 rounded-2xl bg-white/5 border border-white/5 flex items-start gap-3">
+                <Icon name="location_on" class="w-5 h-5 text-[#FF5722] mt-0.5 shrink-0" />
+                <div>
+                  <span class="text-[11px] font-medium text-slate-400 uppercase tracking-wider block">
+                    Dirección de Entrega
+                  </span>
+                  <span id="orderRecipientAddress" class="text-sm font-semibold text-white">
+                    {order.direccion_entrega}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Products Purchased List -->
+          <section class="liquid-glass rounded-3xl p-6 sm:p-7 shadow-lg">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10">
+              <h2 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                <Icon name="inventory_2" class="w-6 h-6 text-[#FF5722]" />
+                <span>Productos en tu Orden (<span id="orderItemsCountLabel">{order.detalle.length}</span>)</span>
+              </h2>
+              <a
+                id="editOrderLink"
+                href={`/?o=e&id=${encodeURIComponent(order.idpedido || '')}`}
+                class="text-xs font-bold text-[#FF5722] hover:underline"
+              >
+                Editar Pedido
+              </a>
+            </div>
+
+            <div id="orderItemsListContainer" class="space-y-3 mt-4">
+              {order.detalle.map((item) => (
+                <div class="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5">
+                  <div class="w-16 h-16 rounded-xl overflow-hidden bg-[#181a22] shrink-0 flex items-center justify-center p-1">
+                    <img
+                      src={item.imagen || '/fotos/buzz-lightyear.svg'}
+                      alt={item.nombre}
+                      width="64"
+                      height="64"
+                      loading="lazy"
+                      class="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-[#FF5722]">
+                      {item.categoria}
+                    </span>
+                    <h3 class="text-sm font-bold text-white truncate">{item.nombre}</h3>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs text-slate-200 font-semibold bg-white/10 px-2 py-0.5 rounded">
+                        Cant: {item.cantidad}
+                      </span>
+                      <span class="text-xs text-slate-400">
+                        x ${formatomonto(item.precio)}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-sm font-extrabold text-white block">
+                      ${formatomonto(item.total)}
+                    </span>
+                    <span class="text-[10px] text-slate-400">Subtotal</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <!-- Total Calculation Breakdown -->
+            <div class="mt-5 pt-4 border-t border-white/10 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-300">
+                <span>Subtotal Productos</span>
+                <span id="orderBreakdownSubtotal" class="font-bold text-white">
+                  ${formatomonto(subtotalAmount)}
+                </span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>Costo de Envío ({order.agencia_entrega})</span>
+                <span id="orderBreakdownShipping" class="font-bold text-emerald-400">
+                  ${formatomonto(shippingCost)} ({deliveryTime})
+                </span>
+              </div>
+              <div class="flex justify-between items-baseline pt-3 border-t border-white/10 text-sm">
+                <span class="font-extrabold text-white text-base">Total Final del Pedido:</span>
+                <span id="orderBreakdownTotal" class="text-2xl font-black text-[#FF5722] font-mono">
+                  ${formatomonto(order.total)}
+                </span>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- RIGHT COLUMN: STEP-BY-STEP WORKFLOW & ACTIONS (5 cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          <section class="liquid-glass rounded-3xl p-6 sm:p-7 shadow-lg">
+            <h2 class="text-lg font-bold text-white tracking-tight flex items-center gap-2 mb-1">
+              <Icon name="route" class="w-6 h-6 text-[#FF5722]" />
+              <span>¿Qué sucede ahora?</span>
+            </h2>
+            <p class="text-xs text-slate-400 mb-6">
+              Proceso de validación y despacho rápido para tu orden.
+            </p>
+
+            <div class="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-3 before:bottom-3 before:w-0.5 before:bg-white/10">
+              <div class="relative">
+                <div class="absolute -left-6 top-0 w-4 h-4 rounded-full bg-[#FF5722] flex items-center justify-center ring-4 ring-[#08090C]">
+                  <span class="text-[9px] font-black text-white">1</span>
+                </div>
+                <h3 class="text-sm font-bold text-white leading-tight">
+                  Verificación por WhatsApp
+                </h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Nuestro asesor verifica tu código UUID y coordina tu forma de pago seleccionada (Efectivo, Transferencia o Tarjeta de Crédito).
+                </p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-6 top-0 w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center ring-4 ring-[#08090C]">
+                  <span class="text-[9px] font-bold text-slate-200">2</span>
+                </div>
+                <h3 class="text-sm font-bold text-white leading-tight">
+                  Empaque y Control de Calidad
+                </h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Preparamos tus unidades y variedades seleccionadas en nuestra bodega matriz con protección sellada.
+                </p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-6 top-0 w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center ring-4 ring-[#08090C]">
+                  <span class="text-[9px] font-bold text-slate-200">3</span>
+                </div>
+                <h3 class="text-sm font-bold text-white leading-tight">
+                  Retiro (15 min) o Despacho a Domicilio (35 min)
+                </h3>
+                <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                  Recibes la notificación inmediata por WhatsApp cuando tu pedido está listo para retirar o en ruta hacia tu dirección.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <div class="liquid-glass rounded-3xl p-5 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#FF5722]/20 text-[#FF5722] flex items-center justify-center shrink-0">
+              <Icon name="verified_user" class="w-6 h-6" />
+            </div>
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-white">
+                Compra 100% Garantizada
+              </h3>
+              <p class="text-[11px] text-slate-300 mt-0.5">
+                Atención directa sin intermediarios con respaldo oficial {storeName}.
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            <a
+              href="/"
+              class="w-full py-3.5 px-5 rounded-2xl bg-[#FF5722] hover:bg-[#e0420f] active:scale-[0.98] text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-950/80 transition-all"
+            >
+              <Icon name="storefront" class="w-5 h-5" />
+              <span>Volver al Catálogo de Productos</span>
+            </a>
+
+            <button
+              type="button"
+              id="printOrderVoucherBtn"
+              class="w-full py-3.5 px-5 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-[0.98] text-slate-200 hover:text-white font-bold text-sm flex items-center justify-center gap-2 border border-white/10 transition-all"
+            >
+              <Icon name="download" class="w-5 h-5" />
+              <span>Imprimir / Guardar Comprobante PDF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <CartDrawer />
+  <ProductDetailModal />
+  <OrderConfirmModal />
+  <FloatingWhatsApp whatsappNumber={whatsappNumber} />
+  <BottomNav activePage="confirmado" whatsappNumber={whatsappNumber} />
+
+  <script
+    id="wigooCatalogData"
+    type="application/json"
+    set:html={JSON.stringify(categories)}
+  />
+
+  <script>
+    import { initStorefront } from '../scripts/store';
+
+    const rawCatalog = document.getElementById('wigooCatalogData')?.textContent || '[]';
+    initStorefront(JSON.parse(rawCatalog));
+
+    // Copy WhatsApp message button
+    document.getElementById('copyWhatsappMsgBtn')?.addEventListener('click', () => {
+      const previewText = document.getElementById('whatsappFormattedPreview')?.textContent || '';
+      const labelEl = document.getElementById('copyBtnLabel');
+      navigator.clipboard?.writeText(previewText).then(() => {
+        if (labelEl) {
+          labelEl.textContent = '¡Copiado!';
+          setTimeout(() => {
+            labelEl.textContent = 'Copiar Resumen';
+          }, 2000);
+        }
+      });
+    });
+
+    // Print / Save PDF voucher button
+    document.getElementById('printOrderVoucherBtn')?.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Confirm payment button (?o=p)
+    const payBtn = document.getElementById('markOrderPaidBtn') as HTMLButtonElement | null;
+    payBtn?.addEventListener('click', async () => {
+      const orderId = payBtn.dataset.orderId;
+      if (!orderId) return;
+      payBtn.disabled = true;
+      payBtn.textContent = 'Actualizando estado...';
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+          method: 'PATCH',
+        });
+        const data = await res.json();
+        if (data.status === '0') {
+          const badge = document.getElementById('orderStatusBadge');
+          if (badge) badge.textContent = 'Orden Confirmada con Éxito (PAGADO)';
+          payBtn.textContent = '✓ Orden Marcada como PAGADO';
+        }
+      } catch {
+        payBtn.disabled = false;
+        payBtn.textContent = 'Reintentar Confirmar Pago';
+      }
+    });
+  </script>
+</BaseLayout>
+

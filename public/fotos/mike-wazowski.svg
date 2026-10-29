@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <radialGradient id="bg_mike-wazowski.svg" cx="50%" cy="42%" r="65%">
+      <stop offset="0%" stop-color="#365314" stop-opacity="0.85"/>
+      <stop offset="65%" stop-color="#12141A" stop-opacity="0.98"/>
+      <stop offset="100%" stop-color="#08090C" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="glow_mike-wazowski.svg" cx="50%" cy="45%" r="40%">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#84CC16" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim_mike-wazowski.svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#84CC16" stop-opacity="0.55"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" rx="36" fill="url(#bg_mike-wazowski.svg)"/>
+  <circle cx="300" cy="255" r="210" fill="url(#glow_mike-wazowski.svg)"/>
+  <ellipse cx="300" cy="410" rx="135" ry="24" fill="#000000" fill-opacity="0.55"/>
+  <rect x="18" y="18" width="564" height="564" rx="28" fill="none" stroke="url(#rim_mike-wazowski.svg)" stroke-width="2"/>
+  <!-- Glass Pedestal Ring -->
+  <ellipse cx="300" cy="395" rx="115" ry="18" fill="#84CC16" fill-opacity="0.12" stroke="#84CC16" stroke-opacity="0.4" stroke-width="1.5"/>
+  <!-- Center Studio Emblem -->
+  <circle cx="300" cy="245" r="112" fill="#ffffff" fill-opacity="0.04" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.5"/>
+  <text x="300" y="278" font-size="125" text-anchor="middle" dominant-baseline="middle">👁️</text>
+  <!-- Badge Pill -->
+  <rect x="150" y="438" width="300" height="34" rx="17" fill="#84CC16" fill-opacity="0.16" stroke="#84CC16" stroke-opacity="0.45" stroke-width="1.2"/>
+  <text x="300" y="460" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#84CC16" letter-spacing="2" text-anchor="middle">MONSTERS INC • 20CM</text>
+  <!-- Title & Subtitle -->
+  <text x="300" y="512" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="800" fill="#FFFFFF" text-anchor="middle">Mike Wazowski</text>
+  <text x="300" y="542" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="500" fill="#94A3B8" text-anchor="middle">Felpa Premium Suave • Wigoo Shop EC</text>
+</svg>

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wigoo Shop EC | Catálogo y Pedidos Directos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-low": "#f6f0e8",
+            "on-secondary-fixed": "#2a2420",
+            "surface-variant": "#ece6dc",
+            "surface-bright": "#faf5ee",
+            "on-error": "#ffffff",
+            "error-container": "#fce4e0",
+            "tertiary-fixed": "#fce0e0",
+            "on-tertiary-container": "#3a2020",
+            "on-tertiary": "#ffffff",
+            "on-secondary-fixed-variant": "#504840",
+            "on-primary-fixed": "#401a08",
+            "on-error-container": "#7a1a10",
+            "surface-container-high": "#ece6dc",
+            "inverse-primary": "#f0a878",
+            "on-primary-fixed-variant": "#8a4518",
+            "surface-container-highest": "#e6e0d6",
+            "on-tertiary-fixed-variant": "#6e3030",
+            "tertiary-fixed-dim": "#e8a0a0",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#605850",
+            "surface": "#faf5ee",
+            "background": "#faf5ee",
+            "on-primary-container": "#fbe8d8",
+            "secondary-container": "#eae2da",
+            "tertiary-container": "#d47070",
+            "primary": "#c2652a",
+            "primary-fixed-dim": "#f0a878",
+            "outline": "#9a9088",
+            "inverse-on-surface": "#faf5ee",
+            "tertiary": "#8c3c3c",
+            "on-primary": "#ffffff",
+            "on-background": "#3a302a",
+            "surface-dim": "#dcd6cc",
+            "secondary-fixed-dim": "#cec6be",
+            "primary-fixed": "#fbe8d8",
+            "surface-tint": "#c2652a",
+            "on-surface": "#3a302a",
+            "secondary-fixed": "#eae2da",
+            "primary-container": "#e08850",
+            "on-tertiary-fixed": "#2e1515",
+            "outline-variant": "#d8d0c8",
+            "secondary": "#78706a",
+            "on-secondary-container": "#605850",
+            "error": "#c0392b",
+            "on-secondary": "#ffffff",
+            "inverse-surface": "#3a302a",
+            "surface-container": "#f2ece4",
+            "wigoo": {
+              "DEFAULT": "#FF5722",
+              "hover": "#f44a15",
+              "dark": "#e0420f",
+              "light": "#ff8a50"
+            },
+            "obsidian": {
+              "950": "#08090C",
+              "900": "#0D0E12",
+              "850": "#12141A",
+              "800": "#171920",
+              "700": "#21242E"
+            },
+            "whatsapp": {
+              "DEFAULT": "#25D366",
+              "dark": "#1ea952"
+            }
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["EB Garamond"],
+            "display": ["EB Garamond"],
+            "body": ["Manrope"],
+            "label": ["Manrope"],
+            "sans": ["Manrope", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        overscroll-behavior-y: none;
+      }
+    }
+    .glass-header {
+      background: rgba(13, 14, 18, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card {
+      background: linear-gradient(145deg, rgba(23, 25, 32, 0.8) 0%, rgba(13, 14, 18, 0.96) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 87, 34, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(255, 87, 34, 0.2);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<meta content="web_dashboard" name="shell-type"/>
+</head>
+<body class="bg-[#08090C] text-slate-100 min-h-screen font-sans selection:bg-[#FF5722] selection:text-white pb-24 md:pb-12 antialiased">
+<!-- ================= TOP HEADER ================= -->
+<header class="sticky top-0 z-40 w-full glass-header">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+<!-- Left: Mobile Menu Toggle & Brand -->
+<div class="flex items-center gap-3">
+<button aria-label="Abrir Menú" class="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 transition-all" onclick="toggleMobileSidebar()">
+<span class="material-symbols-outlined text-[26px]">menu</span>
+</button>
+<a class="flex items-center gap-2.5 group" data-path="catalogo-tienda" href="#">
+<div class="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-md flex items-center justify-center p-0.5 border border-white/20 group-hover:scale-105 transition-transform">
+<img alt="Wigoo Shop Logo" class="w-full h-full object-cover rounded-[10px]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnbbGHFHNRdlK5uULfrdKg3NvODo-HTs4WRS2Eil0t-HP8-g1dbg2YslcUjZ-KTn-vXkYtEG0Ry-IObu8l0T8RoQNlWDwi8LDLPU6iM3Tncsgx1VCqt9CPSgQNZUZZ1e85VAnXlRvcDd4tZsNytLv2jFozT3demMHpzFYamNcSUCABAdAWOM997Y_u-yiKn7IJM_KejalHiKQcoQs-H0M9i6cBD4sTKSe9vVJUZfs6FM6yNOzepAVwPFqtSvtCqqBj"/>
+</div>
+<div class="flex flex-col">
+<span class="font-extrabold text-lg tracking-tight text-white flex items-center gap-1 leading-none">
+              Wigoo Shop <span class="text-[#FF5722] font-black text-sm italic">EC</span>
+</span>
+<span class="text-[10px] text-slate-400 font-medium tracking-wide">Tienda Oficial Ecuador</span>
+</div>
+</a>
+</div>
+<!-- Center: Text-only Nav Links with Route Data-Path -->
+<nav class="hidden md:flex items-center gap-1 bg-white/5 border border-white/10 rounded-2xl p-1" data-active-classes="bg-[#FF5722] text-white font-bold shadow-md shadow-orange-950/60">
+<a class="px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all" data-path="catalogo-tienda" href="#">
+          Catálogo
+        </a>
+<a class="px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all" data-path="carrito-compras" href="#">
+          Carrito
+        </a>
+<a aria-current="page" class="px-4 py-1.5 rounded-xl transition-all bg-[#FF5722] text-white font-bold shadow-md shadow-orange-950/60" data-path="checkout-confirmacion" href="#">
+          Confirmar Pedido
+        </a>
+<a class="px-4 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all" data-path="agradecimiento-exito" href="#">
+          Agradecimiento
+        </a>
+</nav>
+<!-- Right: Direct Cart Action with Orange Badge -->
+<div class="flex items-center gap-2">
+<button aria-label="Ver Carrito" class="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#FF5722]/60 hover:bg-white/10 text-white transition-all flex items-center justify-center group" onclick="toggleCartDrawer(true)">
+<span class="material-symbols-outlined text-[24px] group-hover:scale-105 transition-transform">shopping_bag</span>
+<span class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1.5 rounded-full bg-[#FF5722] text-white text-[11px] font-black flex items-center justify-center shadow-lg shadow-orange-950/80 animate-pulse" id="headerCartCount">
+            1
+          </span>
+</button>
+</div>
+</div>
+</header>
+<!-- ================= CATEGORIES QUICK SLIDER ================= -->
+<div class="border-b border-white/5 bg-[#0D0E12]/90 backdrop-blur-md sticky top-16 z-30">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-2">
+<button aria-label="Categorías anteriores" class="hidden sm:flex w-7 h-7 rounded-full bg-white/5 border border-white/10 hover:bg-[#FF5722] hover:border-[#FF5722] text-slate-300 hover:text-white items-center justify-center flex-shrink-0 transition-colors" onclick="scrollCategories(-200)">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<div class="flex items-center gap-2 overflow-x-auto hide-scrollbar scroll-smooth flex-1 py-1" id="categoryScroller">
+<button class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#FF5722] text-white shadow-md shadow-orange-950/60 flex items-center gap-1 flex-shrink-0 transition-all">
+          Todos
+        </button>
+<button class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-slate-300 flex items-center gap-1.5 flex-shrink-0 transition-all">
+<span>🎁</span> Juguetes
+        </button>
+<button class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-slate-300 flex items-center gap-1.5 flex-shrink-0 transition-all">
+<span>💥</span> Promociones
+        </button>
+<button class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-slate-300 flex items-center gap-1.5 flex-shrink-0 transition-all">
+<span>🧸</span> Infantil
+        </button>
+<button class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-slate-300 flex items-center gap-1.5 flex-shrink-0 transition-all">
+<span>👕</span> Ropa
+        </button>
+<button class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white text-slate-300 flex items-center gap-1.5 flex-shrink-0 transition-all">
+<span>✨</span> Novedades
+        </button>
+</div>
+<button aria-label="Siguientes categorías" class="hidden sm:flex w-7 h-7 rounded-full bg-white/5 border border-white/10 hover:bg-[#FF5722] hover:border-[#FF5722] text-slate-300 hover:text-white items-center justify-center flex-shrink-0 transition-colors" onclick="scrollCategories(200)">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- ================= MAIN CONTENT SLOT ================= -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 pt-16 space-y-6">
+<div class="flex flex-col w-full relative">
+<!-- Subtly visible ambient background mimicking active boutique store -->
+<div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 filter blur-sm opacity-25 pointer-events-none select-none transition-all py-4">
+<div class="bg-surface-container-low p-6 rounded-xl space-y-4">
+<div class="w-full h-44 rounded-lg bg-surface-container-highest"></div>
+<div class="h-4 w-2/3 bg-surface-container-highest rounded"></div>
+<div class="h-3 w-1/3 bg-surface-container-highest rounded"></div>
+<div class="h-8 w-full bg-primary/20 rounded"></div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-4 hidden md:block">
+<div class="w-full h-44 rounded-lg bg-surface-container-highest"></div>
+<div class="h-4 w-1/2 bg-surface-container-highest rounded"></div>
+<div class="h-3 w-1/4 bg-surface-container-highest rounded"></div>
+<div class="h-8 w-full bg-primary/20 rounded"></div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl space-y-4 hidden md:block">
+<div class="w-full h-44 rounded-lg bg-surface-container-highest"></div>
+<div class="h-4 w-3/4 bg-surface-container-highest rounded"></div>
+<div class="h-3 w-1/3 bg-surface-container-highest rounded"></div>
+<div class="h-8 w-full bg-primary/20 rounded"></div>
+</div>
+</div>
+<!-- Modal Presentation Overlay Container (Dark Obsidian with Liquid Glass) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 sm:py-8 overflow-y-auto bg-black/80 backdrop-blur-md">
+<!-- Primary Modal Card: Dark Obsidian & Liquid Glass Theme -->
+<section class="relative w-full max-w-xl my-auto bg-[#12141A]/95 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300">
+<!-- Top Glowing Orange Line -->
+<div class="h-1 w-full bg-gradient-to-r from-transparent via-[#FF5722] to-transparent"></div>
+<!-- Header Section -->
+<header class="px-6 sm:px-8 pt-6 pb-4 flex items-center justify-between border-b border-white/10">
+<div>
+<span class="text-[11px] font-extrabold uppercase tracking-widest text-[#FF5722] flex items-center gap-1.5 font-sans">
+<span class="w-1.5 h-1.5 rounded-full bg-[#FF5722] animate-pulse"></span>
+            Checkout Directo Wigoo
+          </span>
+<h2 class="text-xl sm:text-2xl font-black tracking-tight text-white mt-1">
+            Confirmar Pedido
+          </h2>
+</div>
+<button aria-label="Cerrar modal" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none" onclick="window.history.back()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</header>
+<!-- Compact Cart Summary Banner (Micro-tarjeta liquid glass) -->
+<div class="mx-6 sm:mx-8 mt-5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#FF5722]/30 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#181a22] border border-white/10 flex items-center justify-center text-[#FF5722] shadow-sm">
+<span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-white">3 productos seleccionados</span>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-[#FF5722]/15 text-[#FF5722] border border-[#FF5722]/30 font-bold">EC Express</span>
+</div>
+<p class="text-[11px] text-slate-400 mt-0.5">Juguetes coleccionables • Docenas exclusivas</p>
+</div>
+</div>
+<div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-white/10">
+<span class="text-[11px] text-slate-400 font-medium">Total a pagar:</span>
+<span class="text-xl font-black text-[#FF5722] tracking-tight leading-none mt-0.5">$40.00</span>
+</div>
+</div>
+<!-- Main Order Form -->
+<form class="px-6 sm:px-8 py-5 space-y-4" onsubmit="event.preventDefault(); submitDirectOrder();">
+<!-- Field 1: Nombre y Apellidos -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerName">
+            Nombre y Apellidos <span class="text-[#FF5722]">*</span>
+</label>
+<div class="relative">
+<input class="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all" id="orderCustomerName" placeholder="Ej: Juan Pérez" required="" type="text"/>
+<span class="material-symbols-outlined absolute right-3.5 top-3 text-[18px] text-slate-400 pointer-events-none">person</span>
+</div>
+</div>
+<!-- Row: Teléfono & Documento -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Field 2: Teléfono WhatsApp -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerPhone">
+              Teléfono (WhatsApp) <span class="text-[#FF5722]">*</span>
+</label>
+<div class="flex rounded-xl overflow-hidden bg-white/[0.05] border border-white/10 focus-within:border-[#FF5722] focus-within:ring-1 focus-within:ring-[#FF5722] transition-all">
+<span class="inline-flex items-center gap-1.5 px-3 bg-white/5 border-r border-white/10 text-xs font-bold text-slate-300 select-none">
+<span class="text-sm leading-none">🇪🇨</span>
+<span>+593</span>
+</span>
+<input class="w-full bg-transparent text-white text-sm px-3 py-3 placeholder-slate-500 focus:outline-none" id="orderCustomerPhone" placeholder="Ej: 0962888777" required="" type="tel"/>
+</div>
+</div>
+<!-- Field 3: Documento de Identidad -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerDoc">
+              Documento (Cédula/RUC)
+            </label>
+<div class="relative">
+<input class="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all" id="orderCustomerDoc" placeholder="Cédula / RUC" type="text"/>
+<span class="material-symbols-outlined absolute right-3.5 top-3 text-[18px] text-slate-400 pointer-events-none">badge</span>
+</div>
+</div>
+</div>
+<!-- Field 4: Dirección de Entrega -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerAddress">
+            Dirección de Entrega <span class="text-[#FF5722]">*</span>
+</label>
+<div class="relative">
+<input class="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all" id="orderCustomerAddress" placeholder="Calle principal, número, ciudad y referencia" required="" type="text"/>
+<span class="material-symbols-outlined absolute right-3.5 top-3 text-[18px] text-slate-400 pointer-events-none">location_on</span>
+</div>
+</div>
+<!-- Row: Correo & Forma de Envío -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Field 5: Correo Electrónico -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerEmail">
+              Correo Electrónico
+            </label>
+<div class="relative">
+<input class="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all" id="orderCustomerEmail" placeholder="nombre@ejemplo.com" type="email"/>
+<span class="material-symbols-outlined absolute right-3.5 top-3 text-[18px] text-slate-400 pointer-events-none">alternate_email</span>
+</div>
+</div>
+<!-- Field 6: Forma de Envío -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerShipping">
+              Forma de envío <span class="text-[#FF5722]">*</span>
+</label>
+<div class="relative">
+<select class="w-full bg-[#171920] border border-white/10 rounded-xl pl-3.5 pr-10 py-3 text-sm text-white focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all appearance-none cursor-pointer" id="orderCustomerShipping" required="">
+<option class="bg-[#12141A] text-white" value="Servientrega a domicilio (Ecuador)">Servientrega a domicilio (Ecuador)</option>
+<option class="bg-[#12141A] text-white" value="Envío express local">Envío express local</option>
+<option class="bg-[#12141A] text-white" value="Retiro en local físico">Retiro en local físico</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-[20px] text-slate-400 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Field 7: Notas adicionales (opcional) -->
+<div class="space-y-1.5">
+<label class="block text-xs font-bold uppercase tracking-wider text-white" for="orderCustomerNotes">
+            Notas adicionales <span class="text-[11px] font-normal text-slate-400 lowercase">(opcional)</span>
+</label>
+<input class="w-full bg-white/[0.05] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all" id="orderCustomerNotes" placeholder="Ej: Entregar en horario de oficina o timbre 3B" type="text"/>
+</div>
+<!-- CTA & Assurance Block -->
+<div class="pt-2 space-y-3">
+<button class="w-full py-3.5 px-6 rounded-xl bg-[#25D366] hover:bg-[#1ea952] active:scale-[0.99] text-white font-extrabold text-sm tracking-wide shadow-xl shadow-green-950/60 transition-all flex items-center justify-center gap-2.5 cursor-pointer group" type="submit">
+<svg class="w-5 h-5 fill-current text-white group-hover:scale-110 transition-transform" viewbox="0 0 24 24">
+<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
+</svg>
+<span class="tracking-wide">Enviar Pedido por WhatsApp</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<!-- Informative Helper Note -->
+<div class="px-2 flex items-start gap-2 text-center sm:text-left justify-center">
+<span class="material-symbols-outlined text-[15px] text-emerald-400 shrink-0 mt-0.5">lock</span>
+<p class="text-[11px] leading-relaxed text-slate-400">
+              Al hacer clic, se abrirá WhatsApp con el detalle estructurado de tu pedido para coordinar el pago directo contra entrega o transferencia bancaria.
+            </p>
+</div>
+</div>
+</form>
+</section>
+</div>
+<script>
+    function submitDirectOrder() {
+      const name = document.getElementById('orderCustomerName')?.value || 'Cliente';
+      const phone = document.getElementById('orderCustomerPhone')?.value || '';
+      const doc = document.getElementById('orderCustomerDoc')?.value || 'No especificado';
+      const address = document.getElementById('orderCustomerAddress')?.value || '';
+      const email = document.getElementById('orderCustomerEmail')?.value || 'No especificado';
+      const shipping = document.getElementById('orderCustomerShipping')?.value || 'Servientrega a domicilio (Ecuador)';
+      const notes = document.getElementById('orderCustomerNotes')?.value || 'Sin observaciones adicionales';
+
+      const message = 
+`🛍️ *PEDIDO CONFIRMADO — WIGOO SHOP EC*
+-------------------------------------------
+👤 *Nombre:* ${name}
+📱 *WhatsApp:* +593 ${phone}
+💳 *Cédula/RUC:* ${doc}
+📍 *Dirección:* ${address}
+✉️ *Correo:* ${email}
+🚚 *Modalidad de Envío:* ${shipping}
+📝 *Notas:* ${notes}
+
+📦 *Resumen de Compra:*
+• 3 productos seleccionados (Colección Juguetes & Promos)
+💰 *TOTAL:* $40.00 USD
+-------------------------------------------
+¡Hola! He generado mi orden desde el catálogo web y deseo coordinar el despacho y datos de transferencia.`;
+
+      const targetURL = `https://wa.me/593962888777?text=${encodeURIComponent(message)}`;
+      window.open(targetURL, '_blank');
+    }
+  </script>
+</div>
+</main>
+<!-- ================= DRAWER: CARRITO DE COMPRAS ================= -->
+<div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 transition-opacity opacity-0 pointer-events-none duration-300" id="cartDrawerBackdrop" onclick="toggleCartDrawer(false)"></div>
+<div class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-[#0D0E12] border-l border-white/10 z-50 flex flex-col transform translate-x-full transition-transform duration-300 ease-out shadow-2xl" id="cartDrawer">
+<div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between bg-[#12141A]">
+<button class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group" onclick="toggleCartDrawer(false)">
+<span class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+<span class="font-bold text-base text-white">Mi Carrito</span>
+</button>
+<button aria-label="Cerrar Carrito" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors" onclick="toggleCartDrawer(false)">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4" id="cartItemsList">
+<!-- Cart Item -->
+<div class="glass-card rounded-2xl p-3.5 border border-white/10 flex gap-3 relative" id="sampleCartItem">
+<div class="w-18 h-18 rounded-xl bg-[#181a22] flex-shrink-0 flex items-center justify-center text-3xl border border-white/5">
+          🚀
+        </div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="pr-6">
+<h3 class="text-sm font-bold text-white leading-tight">Buzz Lightyear Edición Especial</h3>
+<p class="text-[11px] text-slate-400 mt-0.5">1 Docena - 20cm</p>
+<span class="text-sm font-black text-[#FF5722] mt-1 block">$10</span>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+<div class="flex items-center bg-white/5 border border-white/10 rounded-xl p-0.5">
+<button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 text-xs font-bold transition-all" onclick="updateQty(-1)">
+                −
+              </button>
+<span class="w-7 text-center font-bold text-xs text-white" id="cartItemQuantity">1</span>
+<button class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 text-xs font-bold transition-all" onclick="updateQty(1)">
+                +
+              </button>
+</div>
+<button class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors" onclick="removeSampleItem()" title="Eliminar producto">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="p-5 border-t border-white/10 bg-[#12141A] space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-slate-300">Total a pagar:</span>
+<span class="text-2xl font-black text-white" id="cartTotalPrice">$10</span>
+</div>
+<button class="w-full py-3.5 px-4 rounded-xl bg-[#FF5722] hover:bg-[#e0420f] active:scale-[0.98] text-white font-black text-sm tracking-wide shadow-lg shadow-orange-950/60 flex items-center justify-center gap-2 transition-all" onclick="openOrderModal()">
+<span>Confirmar Pedido</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<p class="text-[11px] text-center text-slate-400 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-emerald-400">lock</span>
+        Despacho inmediato y pedido directo por WhatsApp
+      </p>
+</div>
+</div>
+<!-- ================= MODAL: CHECKOUT / CONFIRMAR PEDIDO ================= -->
+<div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity opacity-0 pointer-events-none duration-300" id="orderModalBackdrop">
+<div class="bg-[#12141A] border border-white/15 rounded-3xl w-full max-w-lg max-h-[921px] overflow-y-auto shadow-2xl transform scale-95 transition-transform duration-300 flex flex-col" id="orderModalContent">
+<div class="p-5 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#12141A]/95 backdrop-blur-md z-10">
+<div>
+<h2 class="text-lg sm:text-xl font-extrabold text-white flex items-center gap-2">
+            Confirmar Pedido
+          </h2>
+<p class="text-xs text-slate-400 mt-0.5">Ingresa tus datos para procesar el despacho por WhatsApp</p>
+</div>
+<button aria-label="Cerrar ventana" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors" onclick="closeOrderModal()">
+          ✕
+        </button>
+</div>
+<form class="p-5 sm:p-6 space-y-4" onsubmit="handleSendWhatsApp(event)">
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            Nombre y Apellidos <span class="text-[#FF5722]">*</span>
+</label>
+<input class="w-full bg-[#181a22] border border-white/10 focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none" id="custName" placeholder="Ej: Juan Pérez" required="" type="text"/>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              Teléfono (WhatsApp) <span class="text-[#FF5722]">*</span>
+</label>
+<input class="w-full bg-[#181a22] border border-white/10 focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none" id="custPhone" placeholder="Ej: 0962888777" required="" type="tel"/>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              Documento (Cédula/RUC)
+            </label>
+<input class="w-full bg-[#181a22] border border-white/10 focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none" id="custDoc" placeholder="Cédula / RUC" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            Correo Electrónico
+          </label>
+<input class="w-full bg-[#181a22] border border-white/10 focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none" id="custEmail" placeholder="nombre@ejemplo.com" type="email"/>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            Dirección de Entrega <span class="text-[#FF5722]">*</span>
+</label>
+<input class="w-full bg-[#181a22] border border-white/10 focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 transition-all outline-none" id="custAddress" placeholder="Calle principal, ciudad y referencia" required="" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            Forma de Envío <span class="text-[#FF5722]">*</span>
+</label>
+<select class="w-full bg-[#181a22] border border-white/10 focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] rounded-xl px-3.5 py-2.5 text-sm text-white transition-all outline-none" id="custShipping">
+<option value="Servientrega">Servientrega (Todo el Ecuador)</option>
+<option value="Entrega Express">Entrega a Domicilio Express</option>
+<option value="Retiro en Local">Retiro en tienda Wigoo</option>
+</select>
+</div>
+<div class="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between mt-2">
+<div class="text-xs">
+<span class="text-slate-400 block">Total a pagar:</span>
+<span class="text-white font-bold" id="modalOrderSummary">1 item(s) en pedido</span>
+</div>
+<span class="text-xl font-black text-[#FF5722]" id="modalTotalPrice">$10</span>
+</div>
+<button class="w-full py-3.5 px-4 rounded-xl bg-[#25D366] hover:bg-[#1ea952] active:scale-[0.98] text-white font-extrabold text-sm shadow-xl shadow-green-950/60 flex items-center justify-center gap-2 transition-all mt-4" type="submit">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
+</svg>
+<span>Enviar Pedido por WhatsApp</span>
+</button>
+</form>
+</div>
+</div>
+<!-- ================= FLOATING WHATSAPP BUTTON ================= -->
+<a aria-label="Atención por WhatsApp" class="fixed bottom-20 md:bottom-6 right-5 z-40 w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#1ea952] text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all" href="https://wa.me/593962888777?text=Hola%20Wigoo%20Shop%20EC,%20deseo%20hacer%20una%20consulta%20sobre%20un%20producto" rel="noopener noreferrer" target="_blank">
+<svg class="w-8 h-8 fill-current" viewbox="0 0 24 24">
+<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
+</svg>
+</a>
+<!-- ================= FIXED BOTTOM BAR ================= -->
+<nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0D0E12]/95 backdrop-blur-xl border-t border-white/10 px-6 py-2 flex items-center justify-around max-w-lg mx-auto sm:rounded-t-2xl" data-active-classes="text-[#FF5722] font-bold">
+<a class="flex flex-col items-center gap-1 text-[#FF5722] transition-colors" data-path="catalogo-tienda" href="#">
+<span class="material-symbols-outlined text-[22px]">storefront</span>
+<span class="text-[10px] font-bold">Tienda</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors relative" data-path="carrito-compras" href="#" onclick="toggleCartDrawer(true); return false;">
+<span class="material-symbols-outlined text-[22px]">shopping_cart</span>
+<span class="absolute -top-1 right-2 w-4 h-4 rounded-full bg-[#FF5722] text-white text-[10px] font-black flex items-center justify-center" id="bottomNavBadge">1</span>
+<span class="text-[10px] font-medium">Carrito</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center gap-1 transition-colors text-[#FF5722] font-bold" data-path="checkout-confirmacion" href="#" onclick="openOrderModal(); return false;">
+<span class="material-symbols-outlined text-[22px]">assignment_turned_in</span>
+<span class="text-[10px] font-medium">Confirmar</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors" data-path="agradecimiento-exito" href="#">
+<span class="material-symbols-outlined text-[22px]">check_circle</span>
+<span class="text-[10px] font-medium">Éxito</span>
+</a>
+</nav>
+<!-- ================= SIDEBAR MENU DRAWER ================= -->
+<div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 transition-opacity opacity-0 pointer-events-none duration-300" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+<aside class="fixed top-0 left-0 h-full w-72 bg-[#0D0E12] border-r border-white/10 z-50 transform -translate-x-full transition-transform duration-300 p-5 flex flex-col justify-between" id="sidebarDrawer">
+<div>
+<div class="flex items-center justify-between pb-4 border-b border-white/10">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg overflow-hidden bg-white p-0.5">
+<img alt="Wigoo Logo" class="w-full h-full object-cover rounded-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnbbGHFHNRdlK5uULfrdKg3NvODo-HTs4WRS2Eil0t-HP8-g1dbg2YslcUjZ-KTn-vXkYtEG0Ry-IObu8l0T8RoQNlWDwi8LDLPU6iM3Tncsgx1VCqt9CPSgQNZUZZ1e85VAnXlRvcDd4tZsNytLv2jFozT3demMHpzFYamNcSUCABAdAWOM997Y_u-yiKn7IJM_KejalHiKQcoQs-H0M9i6cBD4sTKSe9vVJUZfs6FM6yNOzepAVwPFqtSvtCqqBj"/>
+</div>
+<span class="font-extrabold text-white text-base">Wigoo Shop EC</span>
+</div>
+<button class="text-slate-400 hover:text-white" onclick="toggleMobileSidebar()">✕</button>
+</div>
+<nav class="mt-6 space-y-2" data-active-classes="bg-[#FF5722]/20 text-[#FF5722] font-bold">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-colors" data-path="catalogo-tienda" href="#">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span>Catálogo / Tienda</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-colors" data-path="carrito-compras" href="#">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+<span>Carrito de Compras</span>
+</a>
+<a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors bg-[#FF5722]/20 text-[#FF5722] font-bold" data-path="checkout-confirmacion" href="#">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+<span>Checkout y Confirmación</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-colors" data-path="agradecimiento-exito" href="#">
+<span class="material-symbols-outlined text-[20px]">sentiment_very_satisfied</span>
+<span>Pantalla de Agradecimiento</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm transition-colors" href="https://wa.me/593962888777" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+<span>Asesor WhatsApp</span>
+</a>
+</nav>
+</div>
+<div class="pt-4 border-t border-white/10 text-xs text-slate-500">
+<p>© 2025 Wigoo Shop EC</p>
+<p class="text-[11px] text-slate-400 mt-0.5">Envíos a todo Ecuador</p>
+</div>
+</aside>
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+    let cartItems = [
+      { name: 'Buzz Lightyear', price: 10, qty: 1, spec: '1 Docena - 20cm', icon: '🚀' }
+    ];
+
+    function renderCart() {
+      const listEl = document.getElementById('cartItemsList');
+      const totalEl = document.getElementById('cartTotalPrice');
+      const modalTotalEl = document.getElementById('modalTotalPrice');
+      const modalSummaryEl = document.getElementById('modalOrderSummary');
+      const headerBadge = document.getElementById('headerCartCount');
+      const bottomBadge = document.getElementById('bottomNavBadge');
+
+      const totalQty = cartItems.reduce((acc, item) => acc + item.qty, 0);
+      const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+      if (headerBadge) headerBadge.textContent = totalQty;
+      if (bottomBadge) bottomBadge.textContent = totalQty;
+      if (totalEl) totalEl.textContent = `$${totalAmount}`;
+      if (modalTotalEl) modalTotalEl.textContent = `$${totalAmount}`;
+      if (modalSummaryEl) modalSummaryEl.textContent = `${totalQty} item(s) en pedido`;
+
+      if (!listEl) return;
+      if (cartItems.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-12">
+            <span class="material-symbols-outlined text-5xl text-slate-600 block mb-2">remove_shopping_cart</span>
+            <p class="text-sm font-bold text-white">Tu carrito está vacío</p>
+            <p class="text-xs text-slate-400 mt-1">Explora el catálogo y añade productos con un clic.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = cartItems.map((item, index) => `
+        <div class="glass-card rounded-2xl p-3.5 border border-white/10 flex gap-3 relative">
+          <div class="w-16 h-16 rounded-xl bg-[#181a22] flex-shrink-0 flex items-center justify-center text-3xl border border-white/5">
+            ${item.icon}
+          </div>
+          <div class="flex-1 flex flex-col justify-between">
+            <div class="pr-6">
+              <h3 class="text-sm font-bold text-white leading-tight">${item.name}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${item.spec}</p>
+              <span class="text-sm font-black text-[#FF5722] mt-1 block">$${item.price * item.qty}</span>
+            </div>
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+              <div class="flex items-center bg-white/5 border border-white/10 rounded-xl p-0.5">
+                <button onclick="changeItemQty(${index}, -1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 text-xs font-bold transition-all">
+                  −
+                </button>
+                <span class="w-7 text-center font-bold text-xs text-white">${item.qty}</span>
+                <button onclick="changeItemQty(${index}, 1)" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 active:scale-95 text-xs font-bold transition-all">
+                  +
+                </button>
+              </div>
+              <button onclick="removeItem(${index})" class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition-colors" title="Eliminar producto">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function changeItemQty(index, change) {
+      if (!cartItems[index]) return;
+      cartItems[index].qty += change;
+      if (cartItems[index].qty <= 0) {
+        cartItems.splice(index, 1);
+      }
+      renderCart();
+    }
+
+    function updateQty(change) {
+      changeItemQty(0, change);
+    }
+
+    function removeItem(index) {
+      cartItems.splice(index, 1);
+      renderCart();
+    }
+
+    function removeSampleItem() {
+      removeItem(0);
+    }
+
+    function scrollCategories(amount) {
+      const scroller = document.getElementById('categoryScroller');
+      if (scroller) scroller.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById('cartDrawer');
+      const backdrop = document.getElementById('cartDrawerBackdrop');
+      if (!drawer || !backdrop) return;
+      if (open) {
+        drawer.classList.remove('translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      } else {
+        drawer.classList.add('translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function openOrderModal() {
+      if (cartItems.length === 0) {
+        alert('Por favor añade al menos un producto a tu carrito.');
+        return;
+      }
+      toggleCartDrawer(false);
+      const modal = document.getElementById('orderModalBackdrop');
+      const content = document.getElementById('orderModalContent');
+      if (modal && content) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        content.classList.remove('scale-95');
+      }
+    }
+
+    function closeOrderModal() {
+      const modal = document.getElementById('orderModalBackdrop');
+      const content = document.getElementById('orderModalContent');
+      if (modal && content) {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        content.classList.add('scale-95');
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebarDrawer');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!sidebar || !backdrop) return;
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+      if (isOpen) {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+      } else {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function handleSendWhatsApp(event) {
+      event.preventDefault();
+      const name = document.getElementById('custName')?.value || 'Cliente';
+      const phone = document.getElementById('custPhone')?.value || '';
+      const doc = document.getElementById('custDoc')?.value || 'No especificado';
+      const address = document.getElementById('custAddress')?.value || '';
+      const email = document.getElementById('custEmail')?.value || 'No especificado';
+      const shipping = document.getElementById('custShipping')?.value || 'Servientrega';
+
+      const itemsText = cartItems.map(i => `• ${i.name} (x${i.qty}) - $${i.price * i.qty}`).join('\n');
+      const totalAmount = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+      const msg = `🛍️ *NUEVO PEDIDO - WIGOO SHOP EC*\n\n` +
+                  `👤 *Cliente:* ${name}\n` +
+                  `📱 *Teléfono:* ${phone}\n` +
+                  `💳 *Cédula/RUC:* ${doc}\n` +
+                  `📍 *Dirección:* ${address}\n` +
+                  `✉️ *Correo:* ${email}\n` +
+                  `🚚 *Forma de Envío:* ${shipping}\n\n` +
+                  `📦 *Detalle del Pedido:*\n${itemsText}\n\n` +
+                  `💰 *TOTAL A PAGAR:* $${totalAmount}\n\n` +
+                  `¡Hola! Envío mi orden confirmada desde el catálogo web para coordinar el pago.`;
+
+      const whatsappURL = `https://wa.me/593962888777?text=${encodeURIComponent(msg)}`;
+      window.open(whatsappURL, '_blank');
+      closeOrderModal();
+    }
+
+    renderCart();
+  </script>
+</body></html>
