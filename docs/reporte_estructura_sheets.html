@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Informe Técnico — Estructura de Base de Datos Google Sheets</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1.6cm 1.4cm 1.6cm 1.4cm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      background-color: #ffffff;
+      line-height: 1.45;
+      font-size: 10pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Portada / Encabezado */
+    .header-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+      color: #ffffff;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .badge-top {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.35);
+      border: 1px solid rgba(165, 180, 252, 0.4);
+      color: #c7d2fe;
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .header-card h1 {
+      margin: 0 0 6px 0;
+      font-size: 19pt;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .header-card p.subtitle {
+      margin: 0 0 16px 0;
+      font-size: 10.5pt;
+      color: #cbd5e1;
+      max-width: 90%;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 14px;
+      font-size: 8.5pt;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #94a3b8;
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .meta-item span {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+
+    /* Secciones */
+    h2.section-title {
+      font-size: 13pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 2px solid #6366f1;
+      padding-bottom: 6px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p.lead {
+      color: #475569;
+      font-size: 9.5pt;
+      margin-bottom: 14px;
+    }
+
+    /* Tablas */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      font-size: 8.5pt;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    thead th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 700;
+      text-align: left;
+      padding: 7px 10px;
+      border-bottom: 2px solid #cbd5e1;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tbody td {
+      padding: 6.5px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+      color: #334155;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Tarjetas de Hojas */
+    .sheet-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      background: #ffffff;
+      page-break-inside: avoid;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .sheet-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 6px;
+    }
+
+    .sheet-card-title {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sheet-tag {
+      font-size: 7.5pt;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .tag-read {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .tag-write {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .pill {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 8pt;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .rule-box {
+      background: #fdf4ff;
+      border-left: 3px solid #d946ef;
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 8.5pt;
+      color: #701a75;
+      margin: 8px 0 12px 0;
+    }
+
+    .rule-box strong {
+      color: #86198f;
+    }
+
+    /* Código */
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 7.5pt;
+      line-height: 1.4;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+      page-break-inside: avoid;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer {
+      margin-top: 30px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 10px;
+      font-size: 7.5pt;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PORTADA / ENCABEZADO -->
+  <div class="header-card">
+    <span class="badge-top">Documentación Técnica Oficial</span>
+    <h1>Estructura de Base de Datos en Google Sheets</h1>
+    <p class="subtitle">Especificación del modelo de datos de las 6 hojas de cálculo integradas con el proxy backend serverless, lógica de negocio heredada y checkout WhatsApp para GT E-commerce Lite.</p>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Proyecto</strong>
+        <span>Wigoo Shop EC (v0.1a)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Autor / Titular</strong>
+        <span>Luis Tituaña</span>
+      </div>
+      <div class="meta-item">
+        <strong>Repositorio</strong>
+        <span>LuisT07Ec/gt-ecommerce-lite-v0-1a</span>
+      </div>
+      <div class="meta-item">
+        <strong>Fecha de Emisión</strong>
+        <span>Octubre 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARQUITECTURA -->
+  <h2 class="section-title">1. Resumen Arquitectónico de las 6 Hojas</h2>
+  <p class="lead">El sistema utiliza Google Sheets como base de datos cloud de bajo coste, alta disponibilidad y fácil administración. El frontend en Astro se comunica mediante un <strong>Proxy Backend Serverless</strong> seguro (evitando exponer credenciales en el cliente) que interactúa con las hojas a través de Apps Script y almacenamiento local de contingencia.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 18%;">Pestaña (Hoja)</th>
+        <th style="width: 14%;">Operación</th>
+        <th style="width: 28%;">Endpoints Asociados</th>
+        <th style="width: 40%;">Propósito Principal</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong><code>Configuracion</code></strong></td>
+        <td><span class="sheet-tag tag-read">Lectura</span></td>
+        <td><span class="pill">GET /api/config</span></td>
+        <td>Almacena variables maestras de la tienda (branding, URL, carrusel, WhatsApp, moneda).</td>
+      </tr>
+      <tr>
+        <td><strong><code>Producto</code></strong></td>
+        <td><span class="sheet-tag tag-read">Lectura</span></td>
+        <td><span class="pill">GET /api/config</span></td>
+        <td>Catálogo de productos, categorías, imágenes, precios, variantes y cantidad mínima requerida.</td>
+      </tr>
+      <tr>
+        <td><strong><code>Agencia</code></strong></td>
+        <td><span class="sheet-tag tag-read">Lectura</span></td>
+        <td><span class="pill">GET /api/config</span></td>
+        <td>Modalidades de entrega activas, tarifas de envío asociadas y tiempos de entrega estimados.</td>
+      </tr>
+      <tr>
+        <td><strong><code>FormaPago</code></strong></td>
+        <td><span class="sheet-tag tag-read">Lectura</span></td>
+        <td><span class="pill">GET /api/config</span></td>
+        <td>Métodos de pago aceptados y su estado (Efectivo, Transferencia, Tarjeta de crédito).</td>
+      </tr>
+      <tr>
+        <td><strong><code>Venta</code></strong></td>
+        <td><span class="sheet-tag tag-write">Escritura / Consulta</span></td>
+        <td><span class="pill">POST /api/orders</span><br><span class="pill">GET /api/orders/[id]</span><br><span class="pill">PATCH /api/orders/[id]</span></td>
+        <td>Registro maestro de órdenes con código UUID, datos del cliente, estado y respaldo JSON completo.</td>
+      </tr>
+      <tr>
+        <td><strong><code>DetalleVenta</code></strong></td>
+        <td><span class="sheet-tag tag-write">Escritura</span></td>
+        <td><span class="pill">POST /api/orders</span></td>
+        <td>Desglose pormenorizado de los ítems de cada pedido para reportes y facturación.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- HOJA 1: CONFIGURACION -->
+  <div class="sheet-card">
+    <div class="sheet-card-header">
+      <span class="sheet-card-title">2. Hoja: <code>Configuracion</code></span>
+      <span class="sheet-tag tag-read">Lectura Clave-Valor</span>
+    </div>
+    <p style="margin: 0 0 8px 0; font-size: 8.5pt; color: #64748b;">Estructura vertical estricta. La columna <strong>A</strong> contiene la clave del parámetro y la columna <strong>B</strong> almacena el valor leído por el sistema según la fila exacta.</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 8%;">Fila</th>
+          <th style="width: 24%;">Columna A (Parámetro)</th>
+          <th style="width: 32%;">Columna B (Ejemplo)</th>
+          <th style="width: 36%;">Uso en la Tienda</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>1</strong></td><td><code>Logo</code></td><td><span class="pill">/fotos/logo-wigoo.svg</span></td><td>Ruta o URL del isotipo/logo en el Header.</td></tr>
+        <tr><td><strong>2</strong></td><td><code>Nombre</code></td><td><code>WIGGER SHOP 2</code></td><td>Título de marca en Header, SEO y mensajes.</td></tr>
+        <tr><td><strong>3</strong></td><td><code>URL</code></td><td><code>https://wigooshop.ec</code></td><td>Dominio canónico para enlaces de WhatsApp y orden.</td></tr>
+        <tr><td><strong>4</strong></td><td><code>Carrusel</code></td><td><span class="pill">["/fotos/banner-1.svg", ...]</span></td><td>Array JSON con banners de alta resolución del Hero.</td></tr>
+        <tr><td><strong>5</strong></td><td><code>FormaEntrega</code></td><td><span class="pill">["PASO RETIRAR", "ENVÍO A DOMICILIO"]</span></td><td>Opciones de entrega rápida.</td></tr>
+        <tr><td><strong>6</strong></td><td><code>FormaPago</code></td><td><span class="pill">["Efectivo", "Transferencia", ...]</span></td><td>Opciones de cobro en checkout.</td></tr>
+        <tr><td><strong>7</strong></td><td><code>Contactabilidad</code></td><td><code>593992576986</code></td><td>Número WhatsApp oficial (código país sin '+').</td></tr>
+        <tr><td><strong>8</strong></td><td><code>Moneda</code></td><td><code>$</code></td><td>Símbolo monetario mostrado en precios y tablas.</td></tr>
+        <tr><td><strong>9</strong></td><td><code>TipoFormato</code></td><td><code>es-EC</code></td><td>Configuración regional numérica (separador decimal).</td></tr>
+        <tr><td><strong>10</strong></td><td><code>Decimales</code></td><td><code>2</code></td><td>Cantidad de cifras decimales para redondeo de moneda.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- HOJA 2: PRODUCTO -->
+  <div class="sheet-card">
+    <div class="sheet-card-header">
+      <span class="sheet-card-title">3. Hoja: <code>Producto</code></span>
+      <span class="sheet-tag tag-read">Matriz de Catálogo</span>
+    </div>
+
+    <div class="rule-box">
+      <strong>Regla de oro de variantes (COD_BASE_appscript):</strong> Las filas consecutivas que compartan el mismo valor en <code>Nombre</code> se consolidan automáticamente como variantes de un único producto en el catálogo. Cada variante define su propio precio, sub-variedades y cantidad mínima obligatoria.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 10%;">Columna</th>
+          <th style="width: 18%;">Campo</th>
+          <th style="width: 14%;">Tipo</th>
+          <th style="width: 26%;">Ejemplo</th>
+          <th style="width: 32%;">Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>[A]</strong></td><td><code>Nombre</code></td><td>Texto</td><td><code>Buzz Lightyear</code></td><td>Nombre comercial del producto. Agrupa variantes.</td></tr>
+        <tr><td><strong>[B]</strong></td><td><code>Descripcion</code></td><td>Texto</td><td><code>Figura y peluche espacial de 20cm...</code></td><td>Texto informativo para el modal de detalle.</td></tr>
+        <tr><td><strong>[C]</strong></td><td><code>Variedades</code></td><td>Texto</td><td><code>1 Docena - 20cm</code></td><td>Nombre del paquete, presentación o volumen.</td></tr>
+        <tr><td><strong>[D]</strong></td><td><code>Variedades2</code></td><td>Texto (CSV)</td><td><code>Clásico Espacial, Guardián Galáctico</code></td><td>Sub-variedades (colores, modelos o tallas) seleccionables.</td></tr>
+        <tr><td><strong>[E]</strong></td><td><code>Precio</code></td><td>Decimal</td><td><code>10.00</code></td><td>Precio unitario de esta variante específica.</td></tr>
+        <tr><td><strong>[F]</strong></td><td><code>Categoria</code></td><td>Texto</td><td><code>DISNEY</code></td><td>Categoría de pertenencia (DISNEY, OFERTAS, etc.).</td></tr>
+        <tr><td><strong>[G]</strong></td><td><code>Imagen</code></td><td>JSON / URL</td><td><span class="pill">["/fotos/buzz.svg", ...]</span></td><td>Array JSON con una o más fotos para la galería.</td></tr>
+        <tr><td><strong>[H]</strong></td><td><code>Minima</code></td><td>Entero</td><td><code>1</code> o <code>2</code></td><td>Cantidad mínima obligatoria de compra para el carrito.</td></tr>
+        <tr><td><strong>[I]</strong></td><td><code>Badge</code></td><td>Texto (Opt)</td><td><code>Popular</code>, <code>Súper Oferta</code></td><td>Insignia visual de contraste sobre la tarjeta.</td></tr>
+        <tr><td><strong>[J]</strong></td><td><code>PVP_Original</code></td><td>Decimal (Opt)</td><td><code>18.00</code></td><td>Precio referencial tachado para cálculo de descuento.</td></tr>
+        <tr><td><strong>[K]</strong></td><td><code>Ref</code></td><td>Texto (Opt)</td><td><code>WG-BZ2025-EC</code></td><td>Código de referencia interno o SKU del producto.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HOJAS 3 Y 4: AGENCIA Y FORMAPAGO -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+    <!-- Hoja Agencia -->
+    <div class="sheet-card">
+      <div class="sheet-card-header">
+        <span class="sheet-card-title">4. Hoja: <code>Agencia</code></span>
+        <span class="sheet-tag tag-read">Envíos</span>
+      </div>
+      <p style="margin: 0 0 6px 0; font-size: 8pt; color: #64748b;">Modalidades de despacho disponibles.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>[A] Agencia</th>
+            <th>[B] Costo</th>
+            <th>[C] Tiempo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>PASO RETIRAR</code></td><td><code>0.00</code></td><td><code>15 min</code></td></tr>
+          <tr><td><code>ENVÍO A DOMICILIO</code></td><td><code>1.50</code></td><td><code>35 min</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Hoja FormaPago -->
+    <div class="sheet-card">
+      <div class="sheet-card-header">
+        <span class="sheet-card-title">5. Hoja: <code>FormaPago</code></span>
+        <span class="sheet-tag tag-read">Finanzas</span>
+      </div>
+      <p style="margin: 0 0 6px 0; font-size: 8pt; color: #64748b;">Métodos de cobro activos en checkout.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>[A] ID</th>
+            <th>[B] Tipo</th>
+            <th>[C] Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>1</code></td><td><code>Efectivo</code></td><td><span class="sheet-tag tag-read">ACTIVO</span></td></tr>
+          <tr><td><code>2</code></td><td><code>Transferencia</code></td><td><span class="sheet-tag tag-read">ACTIVO</span></td></tr>
+          <tr><td><code>3</code></td><td><code>Tarjeta de crédito</code></td><td><span class="sheet-tag tag-read">ACTIVO</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HOJAS 5 Y 6: VENTA Y DETALLEVENTA -->
+  <div class="sheet-card">
+    <div class="sheet-card-header">
+      <span class="sheet-card-title">6. Hojas Transaccionales: <code>Venta</code> y <code>DetalleVenta</code></span>
+      <span class="sheet-tag tag-write">Registro Maestro y Detalle</span>
+    </div>
+    <p style="margin: 0 0 6px 0; font-size: 8.5pt; color: #64748b;">Cada pedido recibido por el checkout genera una fila en <strong><code>Venta</code></strong> identificada por un UUID único, y múltiples filas vinculadas en <strong><code>DetalleVenta</code></strong>.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 18%;">Hoja</th>
+          <th style="width: 25%;">Columnas (A-P)</th>
+          <th style="width: 57%;">Descripción Operativa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong><code>Venta</code></strong><br><small style="color:#64748b;">(Cabecera de Orden)</small></td>
+          <td>
+            <span class="pill">[A] Codigo</span> <span class="pill">[B] Fecha</span> <span class="pill">[C] Hora</span><br>
+            <span class="pill">[D] Nombre</span> <span class="pill">[E] Documento</span> <span class="pill">[F] Telefono</span><br>
+            <span class="pill">[G] Correo</span> <span class="pill">[H] Direccion</span> <span class="pill">[I] Agencia</span><br>
+            <span class="pill">[J] Moneda</span> <span class="pill">[K] Total</span> <span class="pill">[L] Json_Raw</span><br>
+            <span class="pill">[M] Costo_Agencia</span> <span class="pill">[N] Tiempo_Agencia</span><br>
+            <span class="pill">[O] Estado</span> <span class="pill">[P] Backup_Edicion</span>
+          </td>
+          <td>
+            El <strong>Codigo</strong> es el UUID único que rastrea la orden. <strong>Estado</strong> inicia en <code>SOLICITADO</code> y puede transicionar a <code>PAGADO</code> vía API. <strong>Json_Raw</strong> almacena el payload íntegro para garantizar reproducibilidad sin pérdida de datos. Si se re-edita el pedido vía <code>?o=e&id=</code>, el estado previo se respalda en <strong>Backup_Edicion</strong>.
+          </td>
+        </tr>
+        <tr>
+          <td><strong><code>DetalleVenta</code></strong><br><small style="color:#64748b;">(Líneas de Facturación)</small></td>
+          <td>
+            <span class="pill">[A] Id_Venta</span> <span class="pill">[B] Producto</span> <span class="pill">[C] Categoria</span><br>
+            <span class="pill">[D] Cantidad</span> <span class="pill">[E] Precio</span> <span class="pill">[F] Subtotal</span>
+          </td>
+          <td>
+            <strong>Id_Venta</strong> actúa como clave foránea que enlaza con el UUID de la tabla <code>Venta</code>. Desglosa cada variante comprada, calculando el subtotal exacto de línea (<code>Cantidad × Precio</code>) para auditoría de inventario.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SCRIPT DE CONFIGURACIÓN AUTOMÁTICA -->
+  <h2 class="section-title">7. Script de Inicialización Automática (Google Apps Script)</h2>
+  <p class="lead">Para construir esta estructura de 6 hojas en una hoja de Google Sheets en blanco con encabezados, formatos y datos de prueba en 1 solo clic, pega el siguiente código en <strong>Extensiones &gt; Apps Script</strong> y ejecuta la función:</p>
+
+  <pre><code>function inicializarEstructuraTienda() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // 1. Pestaña: Configuracion
+  var sheetConf = ss.getSheetByName("Configuracion") || ss.insertSheet("Configuracion");
+  sheetConf.clear();
+  sheetConf.getRange(1, 1, 10, 2).setValues([
+    ["Logo", "/fotos/logo-wigoo.svg"],
+    ["Nombre", "WIGGER SHOP 2"],
+    ["URL", "https://wigooshop.ec"],
+    ["Carrusel", '["/fotos/banner-mayorista-1.svg", "/fotos/banner-ofertas-2.svg", "/fotos/banner-envios-3.svg"]'],
+    ["FormaEntrega", '["PASO RETIRAR", "ENVÍO A DOMICILIO"]'],
+    ["FormaPago", '["Efectivo", "Transferencia", "Tarjeta de crédito"]'],
+    ["Contactabilidad", "593992576986"],
+    ["Moneda", "$"],
+    ["TipoFormato", "es-EC"],
+    ["Decimales", 2]
+  ]);
+  sheetConf.getRange("A1:A10").setFontWeight("bold");
+
+  // 2. Pestaña: Agencia
+  var sheetAgencia = ss.getSheetByName("Agencia") || ss.insertSheet("Agencia");
+  sheetAgencia.clear();
+  sheetAgencia.appendRow(["Agencia", "Costo", "Tiempo"]);
+  sheetAgencia.appendRow(["PASO RETIRAR", 0.00, "15 min"]);
+  sheetAgencia.appendRow(["ENVÍO A DOMICILIO", 1.50, "35 min"]);
+  sheetAgencia.getRange("A1:C1").setFontWeight("bold").setBackground("#e2e8f0");
+
+  // 3. Pestaña: FormaPago
+  var sheetPago = ss.getSheetByName("FormaPago") || ss.insertSheet("FormaPago");
+  sheetPago.clear();
+  sheetPago.appendRow(["ID", "Tipo", "Estado"]);
+  sheetPago.appendRow([1, "Efectivo", "ACTIVO"]);
+  sheetPago.appendRow([2, "Transferencia", "ACTIVO"]);
+  sheetPago.appendRow([3, "Tarjeta de crédito", "ACTIVO"]);
+  sheetPago.getRange("A1:C1").setFontWeight("bold").setBackground("#e2e8f0");
+
+  // 4. Pestaña: Producto (Soporte de Variantes y Cantidad Mínima)
+  var sheetProd = ss.getSheetByName("Producto") || ss.insertSheet("Producto");
+  sheetProd.clear();
+  sheetProd.appendRow([
+    "Nombre", "Descripcion", "Variedades", "Variedades2", "Precio",
+    "Categoria", "Imagen", "Minima", "Badge", "PVP_Original", "Ref"
+  ]);
+  sheetProd.appendRow([
+    "Buzz Lightyear",
+    "Figura y peluche espacial de 20cm con acabados de lujo.",
+    "1 Docena - 20cm",
+    "Clásico Espacial, Guardián Galáctico, Edición Glow",
+    10.00,
+    "DISNEY",
+    '["/fotos/buzz-lightyear.svg", "/fotos/buzz-lightyear-2.svg"]',
+    1,
+    "Popular",
+    18.00,
+    "WG-BZ2025-EC"
+  ]);
+  sheetProd.getRange("A1:K1").setFontWeight("bold").setBackground("#e2e8f0");
+
+  // 5. Pestaña: Venta (Maestro con UUID y Estado)
+  var sheetVenta = ss.getSheetByName("Venta") || ss.insertSheet("Venta");
+  sheetVenta.clear();
+  sheetVenta.appendRow([
+    "Codigo", "Fecha", "Hora", "Nombre", "Documento", "Telefono",
+    "Correo", "Direccion", "Agencia", "Moneda", "Total", "Json_Raw",
+    "Costo_Agencia", "Tiempo_Agencia", "Estado", "Backup_Edicion"
+  ]);
+  sheetVenta.getRange("A1:P1").setFontWeight("bold").setBackground("#e2e8f0");
+
+  // 6. Pestaña: DetalleVenta (Líneas de Facturación)
+  var sheetDetalle = ss.getSheetByName("DetalleVenta") || ss.insertSheet("DetalleVenta");
+  sheetDetalle.clear();
+  sheetDetalle.appendRow(["Id_Venta", "Producto", "Categoria", "Cantidad", "Precio", "Subtotal"]);
+  sheetDetalle.getRange("A1:F1").setFontWeight("bold").setBackground("#e2e8f0");
+
+  SpreadsheetApp.getUi().alert("✅ Estructura de las 6 hojas creada exitosamente.");
+}</code></pre>
+
+  <div class="footer">
+    <span>GT E-commerce Lite — Wigoo Shop EC (v0.1a) • Documento de Soporte Técnico</span>
+    <span>Página 3 de 3</span>
+  </div>
+
+</body>
+</html>
