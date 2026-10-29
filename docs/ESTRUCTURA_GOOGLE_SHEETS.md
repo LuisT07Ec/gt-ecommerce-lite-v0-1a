@@ -204,3 +204,4 @@ function inicializarEstructuraTienda() {
   SpreadsheetApp.getUi().alert("✅ Estructura de las 6 hojas creada con éxito.");
 }
 ```
+
