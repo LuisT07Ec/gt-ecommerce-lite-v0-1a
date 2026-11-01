@@ -14,9 +14,9 @@ import {
   type ProductoCatalogo,
 } from '../lib/sheets-service';
 
-const configData = listarConfiguracion();
+const configData = await listarConfiguracion();
 const storeName = String(configData.pagina_nombre || 'WIGGER SHOP 2');
-const whatsappNumber = String(configData.contactabilidad || '593992576986');
+const whatsappNumber = String(configData.contactabilidad || '');
 const categories = (configData.content || []) as CategoriaCatalogo[];
 const banners = (configData.pagina_carrusel || [
   '/fotos/banner-mayorista-1.svg',

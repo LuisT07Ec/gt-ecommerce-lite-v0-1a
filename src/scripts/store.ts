@@ -438,7 +438,7 @@ export function initStorefront(catalogCategories: CategoriaCatalogo[] = []) {
         clearCart();
         closeOrderModal();
 
-        // Disparar ventana de WhatsApp hacia 593992576986 y redirigir inmediatamente a Página 3
+        // Disparar ventana de WhatsApp oficial de la tienda y redirigir inmediatamente a Página 3
         if (resData.whatsapp_url) {
           window.open(resData.whatsapp_url, '_blank', 'noopener,noreferrer');
         }

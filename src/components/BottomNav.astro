@@ -6,7 +6,11 @@ interface Props {
   whatsappNumber?: string;
 }
 
-const { activePage = 'catalogo', whatsappNumber = '593992576986' } = Astro.props;
+const { activePage = 'catalogo', whatsappNumber = '' } = Astro.props;
+const cleanPhone = String(whatsappNumber || '').replace(/\D/g, '');
+const contactHref = cleanPhone
+  ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent('Hola, necesito asesoría con mi compra en la tienda.')}`
+  : '#';
 ---
 
 <nav
@@ -55,13 +59,12 @@ const { activePage = 'catalogo', whatsappNumber = '593992576986' } = Astro.props
   </a>
 
   <a
-    href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hola WIGGER SHOP 2, necesito asesoría con mi compra.')}`}
-    target="_blank"
-    rel="noopener noreferrer"
+    href={contactHref}
+    target={cleanPhone ? '_blank' : '_self'}
+    rel={cleanPhone ? 'noopener noreferrer' : undefined}
     class="flex flex-col items-center justify-center gap-1 min-w-[48px] min-h-[44px] text-slate-400 hover:text-white transition-colors"
   >
     <Icon name="support_agent" class="w-5 h-5" />
     <span class="text-[10px] font-medium">Contacto</span>
   </a>
 </nav>
-

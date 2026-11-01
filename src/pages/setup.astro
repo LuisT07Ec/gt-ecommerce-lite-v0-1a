@@ -1,0 +1,258 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { getActiveSpreadsheetId, validarEstructuraSheet } from '../lib/sheets-service';
+
+const currentSheetId = getActiveSpreadsheetId();
+let initialValidation = null;
+if (currentSheetId) {
+  initialValidation = await validarEstructuraSheet(currentSheetId);
+}
+
+// Plantilla maestra para clonación directa en 1 clic (PRD V2 Sección 3)
+const SPREADSHEET_MAESTRO_ID = currentSheetId || '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms';
+const COPY_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_MAESTRO_ID}/copy`;
+---
+
+<BaseLayout
+  title="Asistente de Configuración Zero-Code | GT E-commerce Lite"
+  description="Asistente de configuración de 3 minutos para conectar tu Google Sheets con tu tienda en línea."
+  canonicalPath="/setup"
+>
+  <main class="min-h-screen py-12 px-4 sm:px-6 max-w-4xl mx-auto space-y-8">
+    <!-- Header -->
+    <header class="text-center space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF5722]/15 border border-[#FF5722]/30 text-[#FF5722] text-xs font-bold tracking-wider uppercase">
+        <Icon name="verified" class="w-4 h-4" />
+        <span>Onboarding Zero-Code &lt; 3 Minutos</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        Conectar Base de Datos Google Sheets
+      </h1>
+      <p class="text-sm text-slate-400 max-w-xl mx-auto">
+        Configura tu tienda sin tocar código. Sigue estos 3 pasos para clonar la plantilla maestra y vincular tu inventario automáticamente.
+      </p>
+    </header>
+
+    <!-- Estado Actual de Conexión -->
+    <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Estado de Conexión</span>
+          <h2 id="statusTitle" class="text-lg font-bold text-white flex items-center gap-2 mt-0.5">
+            {initialValidation?.valido ? (
+              <span class="text-emerald-400 flex items-center gap-1.5">
+                <Icon name="check_circle" class="w-5 h-5 text-emerald-400" />
+                CONEXIÓN Y ESTRUCTURA VALIDADA EXITOSAMENTE
+              </span>
+            ) : (
+              <span class="text-amber-400 flex items-center gap-1.5">
+                <Icon name="warning" class="w-5 h-5 text-amber-400" />
+                ESTADO: NO CONFIGURADO O ESTRUCTURA INCOMPLETA
+              </span>
+            )}
+          </h2>
+        </div>
+        <a
+          href="/admin"
+          class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-2 transition-all border border-white/10"
+        >
+          <Icon name="settings" class="w-4 h-4 text-[#FF5722]" />
+          Ir al Panel Admin
+        </a>
+      </div>
+
+      <div id="statusAlertBox" class="p-4 rounded-xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono space-y-1">
+        <p><strong>Hoja Activa:</strong> <span id="activeSheetDisplay">{currentSheetId || 'Ninguna (usando catálogo base de demostración)'}</span></p>
+        {initialValidation?.contactabilidad && (
+          <p><strong>WhatsApp Detectado en Hoja:</strong> <span class="text-emerald-400">+{initialValidation.contactabilidad}</span></p>
+        )}
+      </div>
+    </section>
+
+    <!-- Pasos Interactivos -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Paso 1 -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-[#6366F1]/20 border border-[#6366F1]/30 flex items-center justify-center text-[#818CF8] font-black text-sm">
+            1
+          </div>
+          <h3 class="font-bold text-white text-base">Clonar Plantilla Maestra</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Haz clic en el enlace para generar una copia limpia de la plantilla con las 6 pestañas requeridas directamente en tu Google Drive.
+          </p>
+        </div>
+        <a
+          href={COPY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="w-full py-2.5 px-4 rounded-xl bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-bold text-center flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-950/50"
+        >
+          <Icon name="content_copy" class="w-4 h-4" />
+          Clonar Plantilla (/copy)
+        </a>
+      </div>
+
+      <!-- Paso 2 -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-[#EC4899]/20 border border-[#EC4899]/30 flex items-center justify-center text-[#F472B6] font-black text-sm">
+            2
+          </div>
+          <h3 class="font-bold text-white text-base">Publicar en la Web</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            En tu copia de Google Sheets, ve al menú superior: <br />
+            <strong class="text-slate-200">Archivo &gt; Compartir &gt; Publicar en la web</strong> y haz clic en <strong>Publicar</strong>.
+          </p>
+        </div>
+        <div class="py-2.5 px-4 rounded-xl bg-white/5 border border-white/10 text-center text-[11px] text-slate-300 font-medium">
+          Lectura pública sin permisos OAuth
+        </div>
+      </div>
+
+      <!-- Paso 3 -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-between">
+        <div class="space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-[#10B981]/20 border border-[#10B981]/30 flex items-center justify-center text-[#34D399] font-black text-sm">
+            3
+          </div>
+          <h3 class="font-bold text-white text-base">Conectar Spreadsheet ID</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Copia el ID largo de la URL de tu hoja (entre <code class="text-[#FF5722]">/d/</code> y <code class="text-[#FF5722]">/edit</code>) e ingrésalo a continuación.
+          </p>
+        </div>
+        <a
+          href="#configForm"
+          class="w-full py-2.5 px-4 rounded-xl bg-[#10B981] hover:bg-[#059669] text-white text-xs font-bold text-center flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/50"
+        >
+          <Icon name="arrow_downward" class="w-4 h-4" />
+          Ingresar ID
+        </a>
+      </div>
+    </div>
+
+    <!-- Formulario de Configuración y Health-check -->
+    <section id="configForm" class="glass-card p-6 sm:p-8 rounded-2xl border border-white/10 space-y-6">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <Icon name="link" class="w-5 h-5 text-[#FF5722]" />
+        Vincular Hoja y Convalidar Estructura
+      </h3>
+
+      <form id="sheetSetupForm" class="space-y-4">
+        <div>
+          <label for="inputSheetId" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+            Google Spreadsheet ID <span class="text-[#FF5722]">*</span>
+          </label>
+          <input
+            id="inputSheetId"
+            name="sheetId"
+            type="text"
+            required
+            value={currentSheetId}
+            placeholder="Ejemplo: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+            class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] font-mono transition-all"
+          />
+          <p class="text-[11px] text-slate-500 mt-1.5">
+            El ID se almacena de forma segura en las variables de servidor perimetral sin exponerse a los clientes.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            type="submit"
+            id="btnSaveSetup"
+            class="py-3 px-6 rounded-xl bg-[#FF5722] hover:bg-[#e64a19] text-white text-sm font-extrabold flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-950/50 cursor-pointer"
+          >
+            <Icon name="sync" class="w-4 h-4" />
+            <span>Validar y Conectar Hoja</span>
+          </button>
+
+          <a
+            href="/"
+            class="py-3 px-5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-bold transition-all"
+          >
+            Volver a la Tienda
+          </a>
+        </div>
+      </form>
+
+      <!-- Caja de Resultado en Vivo -->
+      <div id="validationResult" class="hidden p-5 rounded-xl border text-xs space-y-3 font-mono">
+        <div id="validationHeader" class="font-bold flex items-center gap-2 text-sm"></div>
+        <div id="validationList" class="space-y-1"></div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('sheetSetupForm') as HTMLFormElement | null;
+  const btn = document.getElementById('btnSaveSetup') as HTMLButtonElement | null;
+  const resultBox = document.getElementById('validationResult');
+  const resultHeader = document.getElementById('validationHeader');
+  const resultList = document.getElementById('validationList');
+  const activeSheetDisplay = document.getElementById('activeSheetDisplay');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('inputSheetId') as HTMLInputElement | null;
+      const sheetId = input?.value?.trim() || '';
+      if (!sheetId) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Verificando conexión...</span>';
+      }
+
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'set_sheet_id', sheetId }),
+        });
+
+        const data = await res.json();
+
+        if (resultBox && resultHeader && resultList) {
+          resultBox.classList.remove('hidden');
+
+          if (res.ok && data.status === '0') {
+            resultBox.className = 'p-5 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 text-xs space-y-2';
+            resultHeader.innerHTML = '✅ [ CONEXIÓN Y ESTRUCTURA VALIDADA EXITOSAMENTE ]';
+            resultList.innerHTML = `
+              <p>• La tienda está conectada y sincronizada con Google Sheets.</p>
+              <p>• Nombre de tienda: <strong>${data.validacion?.storeName || 'Tienda Conectada'}</strong></p>
+              <p>• WhatsApp detectado en hoja: <strong>+${data.validacion?.contactabilidad || 'No configurado'}</strong></p>
+            `;
+            if (activeSheetDisplay) activeSheetDisplay.textContent = sheetId;
+          } else {
+            resultBox.className = 'p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-300 text-xs space-y-2';
+            resultHeader.innerHTML = '⚠️ [ ESTADO: NO CONFIGURADO - ESTRUCTURA INCOMPLETA ]';
+            let detallesHtml = `<p>${data.message || 'Error de convalidación.'}</p>`;
+            if (data.detalles) {
+              detallesHtml += '<ul class="list-disc pl-5 mt-2 space-y-1">';
+              for (const [tab, ok] of Object.entries(data.detalles)) {
+                detallesHtml += `<li>Hoja <strong>${tab}</strong>: ${ok ? '✅ Encontrada' : '❌ Falta o vacía'}</li>`;
+              }
+              detallesHtml += '</ul>';
+            }
+            resultList.innerHTML = detallesHtml;
+          }
+        }
+      } catch (err) {
+        if (resultBox && resultHeader) {
+          resultBox.classList.remove('hidden');
+          resultBox.className = 'p-5 rounded-xl border border-red-500/30 bg-red-950/20 text-red-300 text-xs';
+          resultHeader.textContent = '❌ Error de red al comunicarse con el servidor proxy.';
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Validar y Conectar Hoja</span>';
+        }
+      }
+    });
+  }
+</script>

@@ -28,7 +28,7 @@ Configuración vertical Clave-Valor. La columna **A** indica el parámetro y la 
 | **4** | `Carrusel` | `["/fotos/banner-mayorista-1.svg", "/fotos/banner-ofertas-2.svg", "/fotos/banner-envios-3.svg"]` | Array JSON con las URLs de los banners del Hero carrusel. |
 | **5** | `FormaEntrega` | `["PASO RETIRAR", "ENVÍO A DOMICILIO"]` | Opciones rápidas de entrega. |
 | **6** | `FormaPago` | `["Efectivo", "Transferencia", "Tarjeta de crédito"]` | Opciones rápidas de pago. |
-| **7** | `Contactabilidad` | `593992576986` | Número de WhatsApp (código de país sin `+`). |
+| **7** | `Contactabilidad` | `593900000000` | Número de WhatsApp oficial de la tienda (código de país sin `+`). |
 | **8** | `Moneda` | `$` | Símbolo de moneda. |
 | **9** | `TipoFormato` | `es-EC` | Configuración regional de moneda y separadores. |
 | **10** | `Decimales` | `2` | Cantidad de decimales en montos (2 por defecto). |
@@ -139,7 +139,7 @@ function inicializarEstructuraTienda() {
     ["Carrusel", '["/fotos/banner-mayorista-1.svg", "/fotos/banner-ofertas-2.svg", "/fotos/banner-envios-3.svg"]'],
     ["FormaEntrega", '["PASO RETIRAR", "ENVÍO A DOMICILIO"]'],
     ["FormaPago", '["Efectivo", "Transferencia", "Tarjeta de crédito"]'],
-    ["Contactabilidad", "593992576986"],
+    ["Contactabilidad", "593900000000"],
     ["Moneda", "$"],
     ["TipoFormato", "es-EC"],
     ["Decimales", 2]

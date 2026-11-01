@@ -1,0 +1,223 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import {
+  listarConfiguracion,
+  getActiveSpreadsheetId,
+  type CategoriaCatalogo,
+  type AgenciaItem,
+  type FormaPagoItem,
+} from '../../lib/sheets-service';
+
+const config = await listarConfiguracion();
+const activeSheetId = getActiveSpreadsheetId();
+const categories = (config.content || []) as CategoriaCatalogo[];
+const agencias = (config.contentagencia || []) as AgenciaItem[];
+const pagos = (config.formas_pago || []) as FormaPagoItem[];
+const banners = (config.pagina_carrusel || []) as string[];
+
+let totalProductos = 0;
+let totalVariantes = 0;
+for (const cat of categories) {
+  totalProductos += cat.producto.length;
+  for (const prod of cat.producto) {
+    totalVariantes += prod.variedad.length;
+  }
+}
+
+const googleSheetUrl = activeSheetId
+  ? `https://docs.google.com/spreadsheets/d/${activeSheetId}/edit`
+  : '#';
+---
+
+<BaseLayout
+  title="Panel de Control y Sincronización (/admin) | GT E-commerce Lite"
+  description="Panel administrativo interno para monitoreo y sincronización en tiempo real de Google Sheets."
+  canonicalPath="/admin"
+>
+  <main class="min-h-screen py-10 px-4 sm:px-6 max-w-6xl mx-auto space-y-8">
+    <!-- Header Admin -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 text-xs font-bold tracking-wider uppercase mb-2">
+          <Icon name="verified" class="w-4 h-4" />
+          <span>Panel Interno de Administración</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          Control de Tienda &amp; Sincronización Cloud
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400">
+          Tienda: <strong class="text-slate-200">{config.pagina_nombre}</strong> ({config.pagina_nombre_comercial})
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          id="btnSyncCatalog"
+          class="px-4 py-2.5 rounded-xl bg-[#FF5722] hover:bg-[#e64a19] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-orange-950/40 cursor-pointer"
+        >
+          <Icon name="sync" class="w-4 h-4" />
+          <span>Refrescar Catálogo (?refresh=true)</span>
+        </button>
+
+        <a
+          href="/"
+          class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-2 transition-all"
+        >
+          <Icon name="storefront" class="w-4 h-4" />
+          Ver Tienda
+        </a>
+      </div>
+    </header>
+
+    <!-- Banner Informativo de Bypass Edge Cache -->
+    <div id="syncFeedback" class="hidden p-4 rounded-xl border text-xs font-mono"></div>
+
+    <!-- Grid de Métricas de Sincronización -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Productos Activos</span>
+        <div class="text-2xl font-black text-white">{totalProductos}</div>
+        <span class="text-[11px] text-slate-400">{categories.length} categorías sincronizadas</span>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Variantes y Sub-variedades</span>
+        <div class="text-2xl font-black text-[#FF5722]">{totalVariantes}</div>
+        <span class="text-[11px] text-slate-400">Con cantidades mínimas activas</span>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">WhatsApp Sincronizado</span>
+        <div class="text-lg font-black text-emerald-400 truncate">
+          {config.contactabilidad ? `+${config.contactabilidad}` : 'Sin configurar'}
+        </div>
+        <span class="text-[11px] text-slate-400">Leído de Configuracion!A7:B7</span>
+      </div>
+
+      <div class="glass-card p-5 rounded-2xl border border-white/10 space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Banners Carrusel Hero</span>
+        <div class="text-2xl font-black text-indigo-400">{banners.length}</div>
+        <span class="text-[11px] text-slate-400">Imágenes rotativas en portada</span>
+      </div>
+    </div>
+
+    <!-- Conexión de Hoja de Cálculo -->
+    <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <Icon name="table_chart" class="w-5 h-5 text-emerald-400" />
+            Base de Datos Conectada (Google Sheets)
+          </h2>
+          <p class="text-xs text-slate-400 mt-1 font-mono">
+            Spreadsheet ID: <span class="text-slate-200">{activeSheetId || 'Modo demostración integrado'}</span>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          {activeSheetId && (
+            <a
+              href={googleSheetUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-950/40"
+            >
+              <Icon name="open_in_new" class="w-4 h-4" />
+              Abrir Hoja en Drive
+            </a>
+          )}
+          <a
+            href="/setup"
+            class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-1.5 transition-all border border-white/10"
+          >
+            <Icon name="edit" class="w-4 h-4" />
+            Cambiar Hoja (/setup)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pestañas Detectadas en Vivo -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Métodos de Entrega -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
+        <h3 class="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2">
+          <Icon name="local_shipping" class="w-4 h-4 text-[#FF5722]" />
+          Modalidades de Entrega (Hoja Agencia)
+        </h3>
+        <div class="space-y-2">
+          {agencias.map((ag) => (
+            <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 text-xs">
+              <span class="font-bold text-slate-200">{ag.codigo}</span>
+              <div class="flex items-center gap-3 text-slate-400 font-mono">
+                <span>{config.moneda}{Number(ag.costo).toFixed(2)}</span>
+                <span class="px-2 py-0.5 rounded-md bg-white/10 text-[10px]">{ag.tiempo}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Métodos de Pago -->
+      <div class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
+        <h3 class="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2">
+          <Icon name="credit_card" class="w-4 h-4 text-emerald-400" />
+          Formas de Cobro (Hoja FormaPago)
+        </h3>
+        <div class="space-y-2">
+          {pagos.map((p) => (
+            <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 text-xs">
+              <span class="font-bold text-slate-200">{p.tipo}</span>
+              <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                {p.estado}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  const btnSync = document.getElementById('btnSyncCatalog') as HTMLButtonElement | null;
+  const feedback = document.getElementById('syncFeedback');
+
+  if (btnSync) {
+    btnSync.addEventListener('click', async () => {
+      btnSync.disabled = true;
+      btnSync.innerHTML = '<span>Sincronizando con Edge Cache...</span>';
+
+      try {
+        const res = await fetch('/api/config?refresh=true');
+        const data = await res.json();
+
+        if (feedback) {
+          feedback.classList.remove('hidden');
+          if (res.ok && data.status === '0') {
+            feedback.className = 'p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20 text-emerald-300 text-xs font-mono space-y-1';
+            feedback.innerHTML = `
+              <p>✅ <strong>Caché invalidada y revalidada exitosamente (?refresh=true)</strong></p>
+              <p>• Productos totales actualizados: ${data.content?.reduce((acc: number, c: any) => acc + c.producto.length, 0) || 0}</p>
+              <p>• Número de WhatsApp activo: +${data.contactabilidad || 'No configurado'}</p>
+            `;
+          } else {
+            feedback.className = 'p-4 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-300 text-xs font-mono';
+            feedback.textContent = '⚠️ No se pudo forzar la actualización: ' + (data.message || 'Error desconocido.');
+          }
+        }
+      } catch (err) {
+        if (feedback) {
+          feedback.classList.remove('hidden');
+          feedback.className = 'p-4 rounded-xl border border-red-500/30 bg-red-950/20 text-red-300 text-xs font-mono';
+          feedback.textContent = '❌ Error de red al comunicarse con el servidor.';
+        }
+      } finally {
+        btnSync.disabled = false;
+        btnSync.innerHTML = '<span>Refrescar Catálogo (?refresh=true)</span>';
+      }
+    });
+  }
+</script>
