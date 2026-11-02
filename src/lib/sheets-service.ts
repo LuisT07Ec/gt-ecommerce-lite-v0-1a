@@ -189,10 +189,6 @@ const CATEGORY_ICONS: Record<string, string> = {
 // PERSISTENCIA LOCAL Y GESTIÓN DE CONFIGURACIÓN DINÁMICA
 // ============================================================================
 
-const DATA_DIR = path.resolve(process.cwd(), '.data');
-const DB_FILE = path.join(DATA_DIR, 'sheets-db.json');
-const CONFIG_FILE = path.join(DATA_DIR, 'store-config.json');
-
 interface LocalDatabase {
   ventas: VentaRow[];
   detalleVentas: DetalleVentaRow[];
