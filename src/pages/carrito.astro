@@ -10,17 +10,21 @@ import Icon from '../components/Icon.astro';
 import { listarConfiguracion, type CategoriaCatalogo } from '../lib/sheets-service';
 
 const configData = await listarConfiguracion();
-const storeName = String(configData.pagina_nombre || 'WIGGER SHOP 2');
+const storeName = String(configData.pagina_nombre || 'PELUCHES GT');
+const storeLogo = String(configData.pagina_logo || '/fotos/logo-wigoo.svg');
+const faviconUrl = String(configData.pagina_favicon || '/favicon.svg');
 const whatsappNumber = String(configData.contactabilidad || '');
 const categories = (configData.content || []) as CategoriaCatalogo[];
 ---
 
 <BaseLayout
-  title={`Mi Carrito de Compras | ${storeName} — Wigoo Shop EC`}
-  description="Revisa tus productos seleccionados, elige Paso a Retirar ($0.00) o Envío a Domicilio ($1.50) y confirma tu pedido directo por WhatsApp."
+  title={`Mi Carrito de Compras | ${storeName}`}
+  description="Revisa tus productos seleccionados y confirma tu pedido directo por WhatsApp."
   canonicalPath="/carrito"
+  faviconUrl={faviconUrl}
+  storeName={storeName}
 >
-  <Header activePage="carrito" whatsappNumber={whatsappNumber} storeName={storeName} />
+  <Header activePage="carrito" whatsappNumber={whatsappNumber} storeName={storeName} storeLogo={storeLogo} />
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-16 space-y-6">
     <!-- Cart Navigation Header -->

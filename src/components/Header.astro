@@ -5,12 +5,14 @@ interface Props {
   activePage?: 'catalogo' | 'carrito' | 'confirmado';
   whatsappNumber?: string;
   storeName?: string;
+  storeLogo?: string;
 }
 
 const {
   activePage = 'catalogo',
   whatsappNumber = '',
   storeName = 'WIGGER SHOP 2',
+  storeLogo = '/fotos/logo-wigoo.svg',
 } = Astro.props;
 ---
 
@@ -36,21 +38,22 @@ const {
       </button>
 
       <a class="flex items-center gap-2.5 group" href="/">
-        <div class="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-md flex items-center justify-center p-0.5 border border-white/20 group-hover:scale-105 transition-transform">
+        <div class="w-9 h-9 rounded-xl overflow-hidden bg-white/10 backdrop-blur-md shadow-md flex items-center justify-center p-0.5 border border-white/20 group-hover:scale-105 transition-transform">
           <img
-            src="/fotos/logo-wigoo.svg"
-            alt="Logo Wigoo Shop EC"
+            src={storeLogo}
+            alt={`Logo ${storeName}`}
             width="36"
             height="36"
-            class="w-full h-full object-cover rounded-[10px]"
+            class="w-full h-full object-contain rounded-[10px]"
+            onerror="this.onerror=null;this.src='/fotos/logo-wigoo.svg';"
           />
         </div>
         <div class="flex flex-col">
           <span class="font-extrabold text-base sm:text-lg tracking-tight text-white flex items-center gap-1 leading-none">
-            Wigoo Shop <span class="text-[#FF5722] font-black text-sm italic">EC</span>
+            {storeName}
           </span>
           <span class="text-[10px] text-slate-400 font-medium tracking-wide">
-            {storeName} • Oficial
+            Tienda Oficial
           </span>
         </div>
       </a>

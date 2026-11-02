@@ -6,18 +6,24 @@ interface Props {
   description?: string;
   canonicalPath?: string;
   ogImage?: string;
+  faviconUrl?: string;
+  storeName?: string;
 }
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://wigooshop.ec';
-const storeName = import.meta.env.PUBLIC_STORE_NAME || 'WIGGER SHOP 2';
+const defaultStoreName = import.meta.env.PUBLIC_STORE_NAME || 'WIGGER SHOP 2';
 const whatsappNumber = import.meta.env.PUBLIC_WHATSAPP_NUMBER || '';
 
 const {
-  title = `${storeName} | Wigoo Shop EC — Catálogo Mayorista y Pedidos Directos`,
-  description = 'Tienda en línea oficial Wigoo Shop EC (WIGGER SHOP 2). Catálogo de peluches, juguetes Disney, ofertas e infantil por docena y unidad con envíos a todo el Ecuador.',
+  title,
+  description = 'Tienda en línea oficial. Catálogo mayorista y por unidad con envíos a todo el país.',
   canonicalPath = Astro.url.pathname,
   ogImage = '/fotos/banner-mayorista-1.svg',
+  faviconUrl = '/favicon.svg',
+  storeName = defaultStoreName,
 } = Astro.props;
+
+const pageTitle = title || `${storeName} | Catálogo en Línea y Pedidos Directos`;
 
 const canonicalURL = new URL(canonicalPath, siteUrl).toString();
 const fullOgImage = new URL(ogImage, siteUrl).toString();
@@ -71,17 +77,18 @@ const schemaOrgJsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>{title}</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href={faviconUrl} />
+    <link rel="shortcut icon" href={faviconUrl} />
     <meta name="theme-color" content="#08090C" />
 
     <!-- Open Graph / Social Meta Tags -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_EC" />
     <meta property="og:site_name" content={storeName} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={fullOgImage} />

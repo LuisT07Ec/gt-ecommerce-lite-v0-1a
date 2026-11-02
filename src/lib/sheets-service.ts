@@ -144,6 +144,7 @@ const RAW_CONFIGURACION_DEFAULT = {
   Moneda: '$',
   TipoFormato: 'es-EC',
   Decimales: 2,
+  Favicon: '/favicon.svg',
 };
 
 const RAW_FORMA_PAGO_DEFAULT: FormaPagoItem[] = [
@@ -289,6 +290,8 @@ function writeLocalDB(db: LocalDatabase): void {
   memoryDB = db;
 }
 
+const CONFIG_FILE = '.data/store-config.json';
+
 export function getActiveSpreadsheetId(): string {
   if (memorySpreadsheetId) return memorySpreadsheetId;
   if (typeof process !== 'undefined' && process.env?.GOOGLE_SPREADSHEET_ID) {
@@ -296,6 +299,19 @@ export function getActiveSpreadsheetId(): string {
   }
   if (import.meta.env?.GOOGLE_SPREADSHEET_ID) {
     return String(import.meta.env.GOOGLE_SPREADSHEET_ID).trim();
+  }
+  // Intentar leer de archivo si estamos en entorno con filesystem
+  try {
+    const fs = globalThis.process?.getBuiltinModule ? globalThis.process.getBuiltinModule('fs') : null;
+    if (fs && fs.existsSync(CONFIG_FILE)) {
+      const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+      if (data?.spreadsheetId) {
+        memorySpreadsheetId = String(data.spreadsheetId).trim();
+        return memorySpreadsheetId;
+      }
+    }
+  } catch {
+    // fallback
   }
   return '';
 }
@@ -305,6 +321,15 @@ export function setActiveSpreadsheetId(sheetId: string): void {
   memorySpreadsheetId = cleanId;
   if (typeof process !== 'undefined' && process.env) {
     process.env.GOOGLE_SPREADSHEET_ID = cleanId;
+  }
+  try {
+    const fs = globalThis.process?.getBuiltinModule ? globalThis.process.getBuiltinModule('fs') : null;
+    if (fs) {
+      if (!fs.existsSync('.data')) fs.mkdirSync('.data', { recursive: true });
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify({ spreadsheetId: cleanId, updatedAt: new Date().toISOString() }), 'utf-8');
+    }
+  } catch {
+    // fallback para Edge sin fs
   }
   cachedConfigData = null;
   lastCacheTime = 0;
@@ -326,13 +351,48 @@ function parseTsvRows(tsvText: string): string[][] {
     .filter((row) => row.some((c) => c.length > 0));
 }
 
+function parseRobustCSV(text: string): string[][] {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
+
+    if (char === '"' && inQuotes && nextChar === '"') {
+      currentCell += '"';
+      i++; // saltar quote escapado
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = '';
+    } else if ((char === '\r' || char === '\n') && !inQuotes) {
+      if (char === '\r' && nextChar === '\n') i++;
+      currentRow.push(currentCell.trim());
+      if (currentRow.some((c) => c.length > 0)) rows.push(currentRow);
+      currentRow = [];
+      currentCell = '';
+    } else {
+      currentCell += char;
+    }
+  }
+  if (currentCell || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    if (currentRow.some((c) => c.length > 0)) rows.push(currentRow);
+  }
+  return rows;
+}
+
 export async function fetchSheetTabTsv(spreadsheetId: string, sheetName: string): Promise<string[][] | null> {
   try {
-    // 1. Probar vía endpoint GViz CSV
-    const gvizUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(spreadsheetId)}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+    // 1. Probar vía endpoint GViz CSV con headers=0 para obtener todas las filas sin fusionar encabezados
+    const gvizUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(spreadsheetId)}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&headers=0`;
     let res = await fetch(gvizUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WigooBot/2.0)' } });
 
-    // 2. Fallback a export estándar CSV si GViz requiere login
+    // 2. Fallback a export estándar CSV si GViz requiere login o falla
     if (!res.ok || res.status === 401) {
       const exportUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(spreadsheetId)}/export?format=csv&sheet=${encodeURIComponent(sheetName)}`;
       res = await fetch(exportUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WigooBot/2.0)' } });
@@ -344,19 +404,7 @@ export async function fetchSheetTabTsv(spreadsheetId: string, sheetName: string)
       return null;
     }
 
-    // Parseador CSV simple resiliente
-    const rows: string[][] = [];
-    const lines = text.split(/\r?\n/);
-    for (const l of lines) {
-      if (!l.trim()) continue;
-      const matches = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-      if (matches) {
-        rows.push(matches.map((m) => m.replace(/^"|"$/g, '').trim()));
-      } else {
-        rows.push(l.split(',').map((c) => c.replace(/^"|"$/g, '').trim()));
-      }
-    }
-    return rows;
+    return parseRobustCSV(text);
   } catch {
     return null;
   }
@@ -494,6 +542,7 @@ export async function listarConfiguracion(idPedido?: string, forceRefresh: boole
           if (k.toLowerCase() === 'moneda') conf.Moneda = v;
           if (k.toLowerCase() === 'tipoformato') conf.TipoFormato = v;
           if (k.toLowerCase() === 'decimales') conf.Decimales = Number(v) || 2;
+          if (k.toLowerCase() === 'favicon') conf.Favicon = v;
         }
       }
 
@@ -661,6 +710,7 @@ export async function listarConfiguracion(idPedido?: string, forceRefresh: boole
     moneda: conf.Moneda,
     pagina_url: conf.URL,
     pagina_carrusel: carruselParsed,
+    pagina_favicon: conf.Favicon || '/favicon.svg',
     contactabilidad: conf.Contactabilidad,
     formas_pago: formasPago.filter((f) => f.estado === 'ACTIVO'),
     content: dataArray,

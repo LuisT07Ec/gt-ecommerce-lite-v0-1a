@@ -15,7 +15,9 @@ import {
 } from '../lib/sheets-service';
 
 const configData = await listarConfiguracion();
-const storeName = String(configData.pagina_nombre || 'WIGGER SHOP 2');
+const storeName = String(configData.pagina_nombre || 'PELUCHES GT');
+const storeLogo = String(configData.pagina_logo || '/fotos/logo-wigoo.svg');
+const faviconUrl = String(configData.pagina_favicon || '/favicon.svg');
 const whatsappNumber = String(configData.contactabilidad || '');
 const categories = (configData.content || []) as CategoriaCatalogo[];
 const banners = (configData.pagina_carrusel || [
@@ -33,10 +35,12 @@ for (const cat of categories) {
 ---
 
 <BaseLayout
-  title={`${storeName} | Wigoo Shop EC — Catálogo Liquid Glass y Pedidos WhatsApp`}
-  description="Catálogo mayorista y minorista de peluches Disney, ofertas, juguetes infantiles y ropa en Ecuador. Paso a retirar $0.00 o envío a domicilio $1.50."
+  title={`${storeName} | Catálogo Liquid Glass y Pedidos Directos`}
+  description={`Catálogo en línea oficial de ${storeName}. Variedades por mayor y menor con envíos a todo el país.`}
+  faviconUrl={faviconUrl}
+  storeName={storeName}
 >
-  <Header activePage="catalogo" whatsappNumber={whatsappNumber} storeName={storeName} />
+  <Header activePage="catalogo" whatsappNumber={whatsappNumber} storeName={storeName} storeLogo={storeLogo} />
 
   <!-- ================= STICKY CATEGORIES PILL SLIDER ================= -->
   <div class="border-b border-white/5 bg-[#0D0E12]/90 backdrop-blur-md sticky top-[90px] z-30">

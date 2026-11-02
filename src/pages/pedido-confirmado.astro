@@ -15,7 +15,9 @@ import {
 } from '../lib/sheets-service';
 
 const configData = await listarConfiguracion();
-const storeName = String(configData.pagina_nombre || 'WIGGER SHOP 2');
+const storeName = String(configData.pagina_nombre || 'PELUCHES GT');
+const storeLogo = String(configData.pagina_logo || '/fotos/logo-wigoo.svg');
+const faviconUrl = String(configData.pagina_favicon || '/favicon.svg');
 const whatsappNumber = String(configData.contactabilidad || '');
 const categories = (configData.content || []) as CategoriaCatalogo[];
 
@@ -47,8 +49,10 @@ const whatsappDirectUrl = `https://wa.me/${whatsappNumber}?text=${encodeURICompo
   title={`Pedido Confirmado #${order.idpedido} | ${storeName}`}
   description="Resumen de tu orden con código único UUID e instrucciones de seguimiento por WhatsApp."
   canonicalPath="/pedido-confirmado"
+  faviconUrl={faviconUrl}
+  storeName={storeName}
 >
-  <Header activePage="confirmado" whatsappNumber={whatsappNumber} storeName={storeName} />
+  <Header activePage="confirmado" whatsappNumber={whatsappNumber} storeName={storeName} storeLogo={storeLogo} />
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-16 space-y-6">
     <div class="relative w-full max-w-5xl mx-auto">
