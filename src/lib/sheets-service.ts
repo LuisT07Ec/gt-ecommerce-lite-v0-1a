@@ -328,17 +328,27 @@ function parseTsvRows(tsvText: string): string[][] {
 
 export async function fetchSheetTabTsv(spreadsheetId: string, sheetName: string): Promise<string[][] | null> {
   try {
-    // URL estándar pública de exportación TSV de Google Sheets (no requiere OAuth ni scripts)
-    const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(spreadsheetId)}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-    const res = await fetch(url, { headers: { 'User-Agent': 'WigooStore/2.0' } });
+    // 1. Probar vía endpoint GViz CSV
+    const gvizUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(spreadsheetId)}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+    let res = await fetch(gvizUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WigooBot/2.0)' } });
+
+    // 2. Fallback a export estándar CSV si GViz requiere login
+    if (!res.ok || res.status === 401) {
+      const exportUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(spreadsheetId)}/export?format=csv&sheet=${encodeURIComponent(sheetName)}`;
+      res = await fetch(exportUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WigooBot/2.0)' } });
+    }
+
     if (!res.ok) return null;
     const text = await res.text();
+    if (!text || text.includes('<!DOCTYPE html>') || text.includes('accounts.google.com')) {
+      return null;
+    }
+
     // Parseador CSV simple resiliente
     const rows: string[][] = [];
     const lines = text.split(/\r?\n/);
     for (const l of lines) {
       if (!l.trim()) continue;
-      // Regex para campos CSV con comillas
       const matches = l.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
       if (matches) {
         rows.push(matches.map((m) => m.replace(/^"|"$/g, '').trim()));
@@ -361,6 +371,7 @@ export async function validarEstructuraSheet(spreadsheetId: string): Promise<{
   detalles: Record<string, boolean>;
   contactabilidad?: string;
   storeName?: string;
+  esPrivada?: boolean;
 }> {
   const tabs = ['Configuracion', 'Producto', 'Agencia', 'FormaPago', 'Venta', 'DetalleVenta'];
   const detalles: Record<string, boolean> = {};
@@ -379,7 +390,8 @@ export async function validarEstructuraSheet(spreadsheetId: string): Promise<{
     if (!confRows || confRows.length === 0) {
       return {
         valido: false,
-        mensaje: 'No se pudo leer la hoja. Asegúrate de haberla publicado en la web (Archivo > Compartir > Publicar en la web).',
+        esPrivada: true,
+        mensaje: 'La hoja no tiene permisos públicos de lectura. Para solucionarlo en Google Sheets:\n1. Haz clic en "Compartir" (botón verde superior derecho).\n2. En "Acceso general", cambia a "Cualquier persona con el enlace" en modo "Lector".\n3. O ve a Archivo > Compartir > Publicar en la web.',
         detalles: tabs.reduce((acc, t) => ({ ...acc, [t]: false }), {}),
       };
     }
