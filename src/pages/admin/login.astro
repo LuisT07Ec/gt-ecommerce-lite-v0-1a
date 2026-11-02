@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { isFirstRun, validateSessionToken } from '../../lib/auth-service';
+
+const sessionToken = Astro.cookies.get('admin_session')?.value;
+const isAuthenticated = validateSessionToken(sessionToken);
+
+// Si ya está autenticado, redirigir directo al panel
+if (isAuthenticated) {
+  return Astro.redirect('/admin');
+}
+
+const firstRun = isFirstRun();
+---
+
+<BaseLayout
+  title={firstRun ? "Configurar Administrador | GT E-commerce Lite" : "Iniciar Sesión | Panel de Control"}
+  description="Acceso administrativo seguro para gestión de la tienda y sincronización de Google Sheets."
+  canonicalPath="/admin/login"
+>
+  <main class="min-h-screen py-16 px-4 sm:px-6 flex items-center justify-center">
+    <div class="w-full max-w-md space-y-6">
+      <!-- Header de la tarjeta -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FF5722]/15 border border-[#FF5722]/30 text-[#FF5722] mb-1 shadow-lg shadow-orange-950/40">
+          <Icon name="lock" class="w-6 h-6" />
+        </div>
+        <h1 class="text-2xl font-black text-white tracking-tight">
+          {firstRun ? "Crear Cuenta de Administrador" : "Acceso Administrativo"}
+        </h1>
+        <p class="text-xs text-slate-400 max-w-xs mx-auto">
+          {firstRun 
+            ? "Primera conexión detectada. Define tu usuario y contraseña maestra para proteger el panel."
+            : "Ingresa tus credenciales para administrar el catálogo y sincronización."}
+        </p>
+      </div>
+
+      <!-- Tarjeta Glassmorphism -->
+      <section class="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-[#FF5722]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <form id="authForm" class="space-y-4 relative z-10">
+          <input type="hidden" id="actionType" value={firstRun ? "first_run_setup" : "login"} />
+
+          <!-- Campo Usuario -->
+          <div class="space-y-1.5">
+            <label for="usernameInput" class="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Usuario de Administrador <span class="text-[#FF5722]">*</span>
+            </label>
+            <div class="relative flex items-center">
+              <span class="absolute left-3.5 text-slate-500">
+                <Icon name="person" class="w-4 h-4" />
+              </span>
+              <input
+                id="usernameInput"
+                name="username"
+                type="text"
+                required
+                autocomplete="username"
+                placeholder="admin"
+                class="w-full pl-10 pr-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="space-y-1.5">
+            <label for="passwordInput" class="block text-xs font-bold uppercase tracking-wider text-slate-300">
+              Contraseña {firstRun ? "Maestra (mínimo 6 car.)" : ""} <span class="text-[#FF5722]">*</span>
+            </label>
+            <div class="relative flex items-center">
+              <span class="absolute left-3.5 text-slate-500">
+                <Icon name="lock" class="w-4 h-4" />
+              </span>
+              <input
+                id="passwordInput"
+                name="password"
+                type="password"
+                required
+                autocomplete={firstRun ? "new-password" : "current-password"}
+                placeholder="••••••••"
+                class="w-full pl-10 pr-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- Feedback de error -->
+          <div id="authErrorAlert" class="hidden p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs text-center font-medium"></div>
+
+          <!-- Botón de acción -->
+          <button
+            type="submit"
+            id="authSubmitBtn"
+            class="w-full py-3.5 px-6 rounded-xl bg-[#FF5722] hover:bg-[#e64a19] active:scale-[0.99] text-white font-extrabold text-sm tracking-wide shadow-xl shadow-orange-950/60 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+          >
+            <span>{firstRun ? "Crear Credenciales y Entrar" : "Iniciar Sesión"}</span>
+            <Icon name="arrow_forward" class="w-4 h-4" />
+          </button>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-white/10 text-center">
+          <a href="/" class="text-xs text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1.5">
+            <Icon name="arrow_back" class="w-3.5 h-3.5" />
+            <span>Volver a la Tienda</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('authForm') as HTMLFormElement | null;
+  const btn = document.getElementById('authSubmitBtn') as HTMLButtonElement | null;
+  const alertBox = document.getElementById('authErrorAlert');
+  const actionType = (document.getElementById('actionType') as HTMLInputElement | null)?.value || 'login';
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('usernameInput') as HTMLInputElement | null;
+      const passwordInput = document.getElementById('passwordInput') as HTMLInputElement | null;
+
+      const username = usernameInput?.value?.trim() || '';
+      const password = passwordInput?.value || '';
+
+      if (!username || !password) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Verificando...</span>';
+      }
+      if (alertBox) alertBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: actionType, username, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          window.location.href = '/admin';
+        } else {
+          if (alertBox) {
+            alertBox.textContent = data.message || 'Error en las credenciales.';
+            alertBox.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        if (alertBox) {
+          alertBox.textContent = 'Error de conexión con el servidor.';
+          alertBox.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>${actionType === 'first_run_setup' ? 'Crear Credenciales y Entrar' : 'Iniciar Sesión'}</span>`;
+        }
+      }
+    });
+  }
+</script>
