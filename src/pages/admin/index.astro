@@ -26,9 +26,8 @@ const agencias = (config.contentagencia || []) as AgenciaItem[];
 const pagos = (config.formas_pago || []) as FormaPagoItem[];
 const banners = (config.pagina_carrusel || []) as string[];
 
-const templateCopyUrl = activeSheetId
-  ? `https://docs.google.com/spreadsheets/d/${activeSheetId}/copy`
-  : 'https://docs.google.com/spreadsheets/d/1YkdDKYVDl6V8qGbPF5P6B5gDebv9joq67y9cKyUFd9o/copy';
+const MASTER_TEMPLATE_ID = '1DyK0gKSc5v81Fv5c-NR_f74HvO2-EXjuyEJaRO3JAKk';
+const templateCopyUrl = `https://docs.google.com/spreadsheets/d/${MASTER_TEMPLATE_ID}/copy`;
 
 const logFilePath = path.resolve(process.cwd(), 'error_log.txt');
 let errorLogContent = '';
