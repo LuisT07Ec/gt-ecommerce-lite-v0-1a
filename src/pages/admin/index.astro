@@ -7,11 +7,11 @@ import { validateSessionToken } from '../../lib/auth-service';
 import {
   listarConfiguracion,
   getActiveSpreadsheetId,
+  getActiveWebhookUrl,
   type CategoriaCatalogo,
   type AgenciaItem,
   type FormaPagoItem,
 } from '../../lib/sheets-service';
-import { isGoogleConnected, getGoogleAuthConfig } from '../../lib/google-auth';
 
 const sessionToken = Astro.cookies.get('admin_session')?.value;
 if (!validateSessionToken(sessionToken)) {
@@ -20,13 +20,15 @@ if (!validateSessionToken(sessionToken)) {
 
 const config = await listarConfiguracion();
 const activeSheetId = getActiveSpreadsheetId();
+const activeWebhookUrl = getActiveWebhookUrl();
 const categories = (config.content || []) as CategoriaCatalogo[];
 const agencias = (config.contentagencia || []) as AgenciaItem[];
 const pagos = (config.formas_pago || []) as FormaPagoItem[];
 const banners = (config.pagina_carrusel || []) as string[];
 
-const googleConnected = isGoogleConnected();
-const googleConf = getGoogleAuthConfig();
+const templateCopyUrl = activeSheetId
+  ? `https://docs.google.com/spreadsheets/d/${activeSheetId}/copy`
+  : 'https://docs.google.com/spreadsheets/d/1YkdDKYVDl6V8qGbPF5P6B5gDebv9joq67y9cKyUFd9o/copy';
 
 const logFilePath = path.resolve(process.cwd(), 'error_log.txt');
 let errorLogContent = '';
@@ -164,109 +166,83 @@ const googleSheetUrl = activeSheetId
       </div>
     </section>
 
-    <!-- Conexión Directa con Google Sheets (OAuth 2.0 / Escritura sin Apps Script) -->
+    <!-- Sincronización en la Nube con Google Sheets (Zero Fricción / Descentralizado) -->
     <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-5">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div class="space-y-1">
           <div class="flex items-center gap-2">
             <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <Icon name="verified_user" class="w-5 h-5 text-[#FF5722]" />
-              Conexión Directa de Escritura (Google OAuth 2.0)
+              <Icon name="verified" class="w-5 h-5 text-[#FF5722]" />
+              Sincronización en la Nube con Google Sheets
             </h2>
-            {googleConnected ? (
+            {activeWebhookUrl ? (
               <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
-                ● Conectado (Escritura Habilitada)
+                ● Sincronización en la Nube Activa
               </span>
             ) : (
               <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold">
-                ○ Desconectado (Solo Lectura)
+                ○ Modo Local Resguardado (WhatsApp + Servidor)
               </span>
             )}
           </div>
           <p class="text-xs text-slate-400">
-            {googleConnected
-              ? `Vinculado con la cuenta: ${googleConf.email || 'Google Account'}. Los pedidos se escriben automáticamente en Venta y DetalleVenta vía Google Sheets API v4.`
-              : 'Conecta tu cuenta de Google con un clic para escribir ventas en tu hoja sin necesidad de Google Apps Script.'}
+            {activeWebhookUrl
+              ? 'Tus ventas se sincronizan en vivo en las pestañas Venta y DetalleVenta de tu Google Sheet sin intervención manual.'
+              : 'Conecta tu hoja para sincronizar cada venta en la nube. Puedes clonar la plantilla oficial ya lista con un solo clic.'}
           </p>
         </div>
 
         <div class="flex items-center gap-3">
-          {googleConnected ? (
-            <button
-              type="button"
-              id="btnDisconnectGoogle"
-              class="px-4 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
-            >
-              <Icon name="link_off" class="w-4 h-4" />
-              Desvincular Cuenta
-            </button>
-          ) : (
-            <div class="flex items-center gap-2">
-              {googleConf.clientId ? (
-                <a
-                  href="/api/auth/google/login"
-                  class="px-5 py-2.5 rounded-xl bg-[#4285F4] hover:bg-[#3367D6] text-white text-xs font-extrabold flex items-center gap-2 transition-all shadow-lg shadow-blue-950/50 cursor-pointer"
-                >
-                  <svg class="w-4 h-4" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/>
-                  </svg>
-                  <span>Conectar con Google Sheets</span>
-                </a>
-              ) : null}
-              <button
-                type="button"
-                id="btnToggleCredentials"
-                class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all border border-white/10 cursor-pointer"
-              >
-                <Icon name="key" class="w-4 h-4 text-amber-400" />
-                <span>Configurar Credenciales OAuth</span>
-              </button>
-            </div>
-          )}
+          <a
+            href={templateCopyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#FF5722] to-amber-600 hover:brightness-110 text-white text-xs font-extrabold flex items-center gap-2 transition-all shadow-lg shadow-orange-950/50 cursor-pointer"
+          >
+            <Icon name="content_copy" class="w-4 h-4" />
+            <span>Clonar Plantilla Oficial en 1 Clic</span>
+          </a>
         </div>
       </div>
 
-      <!-- Formulario Desplegable para Configurar Client ID & Secret -->
-      <div id="credentialsForm" class="hidden p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
-        <div class="text-xs text-slate-300">
-          <strong>Credenciales de tu Proyecto en Google Cloud Console:</strong>
-          <p class="text-slate-400 mt-0.5">Ingresa tu Client ID y Client Secret para que la autenticación opere bajo tu propia titularidad.</p>
+      <!-- Configuración de URL de Sincronización (Webhook Apps Script) -->
+      <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <label for="inputWebhookUrl" class="text-xs font-bold text-slate-200">
+            URL de Sincronización de tu Hoja (Apps Script Webhook):
+          </label>
+          <span class="text-[11px] text-slate-400">Termina en <code class="text-amber-300">/exec</code></span>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
           <input
-            id="inputClientId"
-            type="text"
-            placeholder="Google Client ID (ej: 123...apps.googleusercontent.com)"
-            value={googleConf.clientId || ''}
-            class="w-full bg-[#181a22] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722]"
+            id="inputWebhookUrl"
+            type="url"
+            placeholder="https://script.google.com/macros/s/.../exec"
+            value={activeWebhookUrl || ''}
+            class="w-full bg-[#181a22] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] font-mono"
           />
-          <input
-            id="inputClientSecret"
-            type="password"
-            placeholder="Google Client Secret"
-            value={googleConf.clientSecret || ''}
-            class="w-full bg-[#181a22] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722]"
-          />
-        </div>
-        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
-          <p class="text-[11px] text-slate-400 font-mono">
-            URI de redirección en Google Cloud: <code class="px-1.5 py-0.5 rounded bg-black/40 text-amber-300">/api/auth/google/callback</code>
-          </p>
           <button
             type="button"
-            id="btnSaveCredentials"
-            class="px-4 py-2 rounded-xl bg-[#FF5722] hover:bg-[#e64a19] text-white text-xs font-bold cursor-pointer"
+            id="btnSaveWebhook"
+            class="px-5 py-2.5 rounded-xl bg-[#FF5722] hover:bg-[#e64a19] text-white text-xs font-bold transition-all shrink-0 cursor-pointer shadow-md shadow-orange-950/40"
           >
-            Guardar Credenciales
+            Guardar Sincronización
           </button>
         </div>
+
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          💡 <strong>Guía rápida en 2 pasos:</strong><br />
+          1. Haz clic en <strong>"Clonar Plantilla Oficial en 1 Clic"</strong> (Google creará tu copia en 1 segundo con las 6 hojas listas).<br />
+          2. En tu copia, ve al menú <strong>Extensiones &gt; Apps Script &gt; Implementar &gt; Nueva Implementación (Aplicación Web)</strong>, presiona Implementar y pega la URL aquí.
+        </p>
       </div>
 
-      <!-- Garantía de Privacidad y Responsabilidad -->
+      <!-- Garantía de Privacidad y Descentralización Total -->
       <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-3">
         <Icon name="shield" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
         <div class="text-[11px] text-slate-300 leading-relaxed">
-          <strong>Privacidad y Descentralización:</strong> Tus tokens de acceso y actualización se almacenan exclusivamente en el servidor local de tu tienda (<code class="text-slate-200">.data/google_auth.json</code>). Ningún desarrollador ni servidor externo tiene acceso a tus hojas ni a tu cuenta.
+          <strong>100% Privado y Descentralizado:</strong> Las ventas y datos de tus clientes viajan directamente entre tu tienda web y tu propia cuenta de Google Sheets. Ningún desarrollador ni servidor externo tiene acceso a tus ventas, clientes o facturación.
         </div>
       </div>
     </section>
@@ -398,75 +374,43 @@ const googleSheetUrl = activeSheetId
     });
   }
 
-  // Manejo de Google OAuth 2.0
-  const btnToggleCreds = document.getElementById('btnToggleCredentials');
-  const credsForm = document.getElementById('credentialsForm');
-  const btnSaveCreds = document.getElementById('btnSaveCredentials');
-  const btnDisconnect = document.getElementById('btnDisconnectGoogle');
+  // Manejo de URL de Sincronización Webhook (Apps Script)
+  const btnSaveWebhook = document.getElementById('btnSaveWebhook') as HTMLButtonElement | null;
+  btnSaveWebhook?.addEventListener('click', async () => {
+    const input = document.getElementById('inputWebhookUrl') as HTMLInputElement | null;
+    const webhookUrl = input?.value.trim() || '';
 
-  btnToggleCreds?.addEventListener('click', () => {
-    credsForm?.classList.toggle('hidden');
-  });
-
-  btnSaveCreds?.addEventListener('click', async () => {
-    const clientId = (document.getElementById('inputClientId') as HTMLInputElement)?.value.trim();
-    const clientSecret = (document.getElementById('inputClientSecret') as HTMLInputElement)?.value.trim();
-
-    if (!clientId || !clientSecret) {
-      alert('Por favor ingresa tanto el Client ID como el Client Secret.');
+    if (webhookUrl && !webhookUrl.includes('/exec')) {
+      alert('La URL debe ser una Aplicación Web de Google Apps Script terminada en "/exec".');
       return;
     }
 
-    try {
-      const res = await fetch('/api/auth/google/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_credentials', clientId, clientSecret }),
-      });
-      const data = await res.json();
-      if (res.ok && data.status === '0') {
-        alert('Credenciales guardadas exitosamente. Ya puedes presionar "Conectar con Google Sheets".');
-        window.location.reload();
-      } else {
-        alert(data.message || 'Error guardando credenciales.');
-      }
-    } catch {
-      alert('Error de red al guardar credenciales.');
-    }
-  });
-
-  btnDisconnect?.addEventListener('click', async () => {
-    if (!confirm('¿Seguro que deseas desvincular tu cuenta de Google Sheets? Las nuevas ventas no se sincronizarán directamente hasta volver a conectar.')) {
-      return;
+    if (btnSaveWebhook) {
+      btnSaveWebhook.disabled = true;
+      btnSaveWebhook.textContent = 'Guardando...';
     }
 
     try {
-      const res = await fetch('/api/auth/google/manage', {
+      const res = await fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'disconnect' }),
+        body: JSON.stringify({ action: 'set_webhook_url', webhookUrl }),
       });
       const data = await res.json();
       if (res.ok && data.status === '0') {
-        alert('Cuenta desvinculada exitosamente.');
+        alert(webhookUrl ? '¡URL de sincronización guardada con éxito! Cada venta confirmada se sincronizará automáticamente con tu hoja de Google Sheets.' : 'URL eliminada correctamente.');
         window.location.reload();
       } else {
-        alert(data.message || 'Error al desvincular cuenta.');
+        alert(data.message || 'Error guardando URL de sincronización.');
       }
     } catch {
-      alert('Error de red al desvincular cuenta.');
+      alert('Error de red al guardar la URL de sincronización.');
+    } finally {
+      if (btnSaveWebhook) {
+        btnSaveWebhook.disabled = false;
+        btnSaveWebhook.textContent = 'Guardar Sincronización';
+      }
     }
   });
-
-  // Notificaciones según URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('google_connected') === 'true') {
-    const email = urlParams.get('email');
-    alert(`¡Cuenta de Google conectada exitosamente! ${email ? `(${email})` : ''}\nLa escritura directa a Google Sheets está activa.`);
-    window.history.replaceState({}, document.title, '/admin');
-  } else if (urlParams.get('google_error')) {
-    alert(`Aviso de Google OAuth: ${decodeURIComponent(urlParams.get('google_error') || '')}`);
-    window.history.replaceState({}, document.title, '/admin');
-  }
 </script>
 

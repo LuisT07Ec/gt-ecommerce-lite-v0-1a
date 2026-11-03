@@ -3,3 +3,4 @@
 # a Google APIs. Los tokens y credenciales residen exclusivamente en el entorno local (.data/google_auth.json).
 # Los desarrolladores de GT E-commerce Lite no almacenan ni tienen acceso a las cuentas o datos de terceros.
 # ================================================================================
+

@@ -15,3 +15,4 @@ export const GET: APIRoute = async ({ url, redirect }) => {
     return redirect(`/admin?google_error=${msg}`);
   }
 };
+

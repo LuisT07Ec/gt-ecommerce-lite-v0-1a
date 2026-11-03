@@ -337,6 +337,58 @@ function writeLocalDB(db: LocalDatabase): void {
 
 const CONFIG_FILE = '.data/store-config.json';
 
+let memoryWebhookUrl = '';
+
+export function getActiveWebhookUrl(): string {
+  if (memoryWebhookUrl) return memoryWebhookUrl;
+  if (typeof process !== 'undefined' && process.env?.APPS_SCRIPT_WEBHOOK_URL) {
+    return process.env.APPS_SCRIPT_WEBHOOK_URL.trim();
+  }
+  if (import.meta.env?.APPS_SCRIPT_WEBHOOK_URL) {
+    return String(import.meta.env.APPS_SCRIPT_WEBHOOK_URL).trim();
+  }
+  try {
+    const fs = globalThis.process?.getBuiltinModule ? globalThis.process.getBuiltinModule('fs') : null;
+    if (fs && fs.existsSync(CONFIG_FILE)) {
+      const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+      if (data?.webhookUrl) {
+        memoryWebhookUrl = String(data.webhookUrl).trim();
+        return memoryWebhookUrl;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return '';
+}
+
+export function setActiveWebhookUrl(webhookUrl: string): void {
+  const cleanUrl = String(webhookUrl || '').trim();
+  memoryWebhookUrl = cleanUrl;
+  if (typeof process !== 'undefined' && process.env) {
+    process.env.APPS_SCRIPT_WEBHOOK_URL = cleanUrl;
+  }
+  try {
+    const fs = globalThis.process?.getBuiltinModule ? globalThis.process.getBuiltinModule('fs') : null;
+    if (fs) {
+      if (!fs.existsSync('.data')) fs.mkdirSync('.data', { recursive: true });
+      let existingData: Record<string, unknown> = {};
+      if (fs.existsSync(CONFIG_FILE)) {
+        try {
+          existingData = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+        } catch {
+          // ignore
+        }
+      }
+      existingData.webhookUrl = cleanUrl;
+      existingData.updatedAt = new Date().toISOString();
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify(existingData, null, 2), 'utf-8');
+    }
+  } catch {
+    // fallback
+  }
+}
+
 export function getActiveSpreadsheetId(): string {
   if (memorySpreadsheetId) return memorySpreadsheetId;
   if (typeof process !== 'undefined' && process.env?.GOOGLE_SPREADSHEET_ID) {
@@ -371,7 +423,17 @@ export function setActiveSpreadsheetId(sheetId: string): void {
     const fs = globalThis.process?.getBuiltinModule ? globalThis.process.getBuiltinModule('fs') : null;
     if (fs) {
       if (!fs.existsSync('.data')) fs.mkdirSync('.data', { recursive: true });
-      fs.writeFileSync(CONFIG_FILE, JSON.stringify({ spreadsheetId: cleanId, updatedAt: new Date().toISOString() }), 'utf-8');
+      let existingData: Record<string, unknown> = {};
+      if (fs.existsSync(CONFIG_FILE)) {
+        try {
+          existingData = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+        } catch {
+          // ignore
+        }
+      }
+      existingData.spreadsheetId = cleanId;
+      existingData.updatedAt = new Date().toISOString();
+      fs.writeFileSync(CONFIG_FILE, JSON.stringify(existingData, null, 2), 'utf-8');
     }
   } catch {
     // fallback para Edge sin fs
@@ -1033,9 +1095,9 @@ export async function registrarVenta(ventaInput: VentaPayload) {
       }
     }
 
-    // 2. Si no se usó OAuth v4 o falló, intentar fallback con Webhook de Apps Script
+    // 2. Si no se usó OAuth v4 o falló, intentar sincronización con Webhook de Apps Script
     if (!sincronizacionExitosa) {
-      const webhookUrl = process.env.APPS_SCRIPT_WEBHOOK_URL || import.meta.env?.APPS_SCRIPT_WEBHOOK_URL;
+      const webhookUrl = getActiveWebhookUrl();
       if (webhookUrl) {
         const maxRetries = 3;
         let attempt = 0;
@@ -1066,7 +1128,13 @@ export async function registrarVenta(ventaInput: VentaPayload) {
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
 
-        if (!pushSuccess) {
+        if (pushSuccess) {
+          recordConsentLog(
+            'VENTA_REGISTRADA_EN_GOOGLE_SHEETS',
+            'Webhook Apps Script',
+            `Orden ${codigoventa} registrada exitosamente en las pestañas Venta y DetalleVenta. Cliente: ${ventaCompleta.nombre_entrega} | Total: ${moneda}${totalFinal}`
+          );
+        } else {
           logSystemError({
             title: 'GOOGLE_SHEETS_PUSH_FALLIDO',
             pointOfFailure: 'sheets-service.ts -> registrarVenta() -> fetch(webhookUrl)',
@@ -1078,7 +1146,7 @@ export async function registrarVenta(ventaInput: VentaPayload) {
         logSystemError({
           title: 'GOOGLE_SHEETS_SIN_CONEXION_CONFIGURADA',
           pointOfFailure: 'sheets-service.ts -> registrarVenta()',
-          description: 'La orden quedó guardada localmente. Para sincronizarla en la nube, conecta tu cuenta de Google con un clic en /admin o configura APPS_SCRIPT_WEBHOOK_URL.',
+          description: 'La orden quedó guardada localmente. Para sincronizarla en tu Google Sheets, ingresa tu URL de Webhook en el panel /admin.',
           error: `Orden: ${codigoventa} | Cliente: ${ventaCompleta.nombre_entrega} | Total: ${moneda}${totalFinal}`,
         });
       }

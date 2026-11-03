@@ -4,6 +4,8 @@ import {
   validarEstructuraSheet,
   setActiveSpreadsheetId,
   getActiveSpreadsheetId,
+  setActiveWebhookUrl,
+  getActiveWebhookUrl,
 } from '../../lib/sheets-service';
 
 export const GET: APIRoute = async ({ url }) => {
@@ -70,6 +72,22 @@ export const POST: APIRoute = async ({ request }) => {
           { status: 400, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
         );
       }
+    }
+
+    // Acción para configurar la URL de sincronización Webhook (Apps Script)
+    if (action === 'set_webhook_url') {
+      const webhookUrl = String(body?.webhookUrl || '').trim();
+      setActiveWebhookUrl(webhookUrl);
+      return new Response(
+        JSON.stringify({
+          status: '0',
+          message: webhookUrl
+            ? 'URL de sincronización Webhook guardada exitosamente.'
+            : 'URL de Webhook eliminada.',
+          webhookUrl,
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+      );
     }
 
     const idPedido = body?.id ? String(body.id) : undefined;
