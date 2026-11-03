@@ -1,4 +1,6 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
 import { validateSessionToken } from '../../lib/auth-service';
@@ -21,6 +23,12 @@ const categories = (config.content || []) as CategoriaCatalogo[];
 const agencias = (config.contentagencia || []) as AgenciaItem[];
 const pagos = (config.formas_pago || []) as FormaPagoItem[];
 const banners = (config.pagina_carrusel || []) as string[];
+
+const logFilePath = path.resolve(process.cwd(), 'error_log.txt');
+let errorLogContent = '';
+if (fs.existsSync(logFilePath)) {
+  errorLogContent = fs.readFileSync(logFilePath, 'utf-8');
+}
 
 let totalProductos = 0;
 let totalVariantes = 0;
@@ -183,6 +191,20 @@ const googleSheetUrl = activeSheetId
             </div>
           ))}
         </div>
+      </div>
+    </section>
+
+    <!-- Bitácora de Registro de Errores e Incidencias (error_log.txt) -->
+    <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2">
+          <Icon name="history" class="w-4 h-4 text-[#FF5722]" />
+          Bitácora de Errores e Incidencias del Backend (error_log.txt)
+        </h3>
+        <span class="text-[11px] text-slate-400">Auditoría en tiempo real</span>
+      </div>
+      <div class="p-4 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-slate-300 max-h-72 overflow-y-auto whitespace-pre-wrap select-all">
+        {errorLogContent || 'No se registran errores recientes en el sistema.'}
       </div>
     </section>
   </main>
