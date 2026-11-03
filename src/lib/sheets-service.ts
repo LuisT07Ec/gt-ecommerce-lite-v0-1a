@@ -1,4 +1,5 @@
 import { logSystemError } from './logger';
+import { isGoogleConnected, appendRowsToGoogleSheet, recordConsentLog } from './google-auth';
 
 /**
  * Generador de código de pedido alfanumérico limpio de máximo 9 caracteres.
@@ -971,53 +972,116 @@ export async function registrarVenta(ventaInput: VentaPayload) {
 
     writeLocalDB(db);
 
-    // Push con Exponential Backoff y Jitter si hay Webhook o API de Sheets
-    const webhookUrl = process.env.APPS_SCRIPT_WEBHOOK_URL || import.meta.env?.APPS_SCRIPT_WEBHOOK_URL;
-    if (webhookUrl) {
-      const maxRetries = 3;
-      let attempt = 0;
-      let pushSuccess = false;
-      let lastErr: unknown = null;
-      while (attempt < maxRetries) {
-        try {
-          const res = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              op: 'venta',
-              batchUpdate: true,
-              ...ventaCompleta,
-            }),
-          });
-          if (res.ok) {
-            pushSuccess = true;
-            break;
-          }
-          lastErr = new Error(`HTTP ${res.status}: ${res.statusText}`);
-        } catch (fetchErr) {
-          lastErr = fetchErr;
-        }
-        attempt++;
-        const jitter = Math.random() * 200;
-        const delay = Math.pow(2, attempt) * 300 + jitter;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
+    // 1. Intentar sincronización directa vía Google Sheets REST API v4 si OAuth 2.0 está conectado
+    let sincronizacionExitosa = false;
+    if (isGoogleConnected() && spreadsheetId) {
+      try {
+        const filaVentaApi: (string | number)[] = [
+          codigoventa,
+          fecha,
+          hora,
+          ventaCompleta.nombre_entrega,
+          ventaCompleta.rut_entrega || 'Consumidor Final',
+          ventaCompleta.telefono_entrega,
+          ventaCompleta.correo_entrega || '',
+          ventaCompleta.direccion_entrega,
+          nombreAgencia,
+          formaPago,
+          ventaCompleta.subtotal || subtotalItems,
+          costoAgencia,
+          totalFinal,
+          'SOLICITADO',
+          JSON.stringify(ventaCompleta),
+        ];
 
-      if (!pushSuccess) {
+        const filasDetalleApi: (string | number)[][] = itemsLimpios.map((item) => [
+          codigoventa,
+          item.nombre,
+          item.categoria,
+          item.cantidad,
+          item.precio,
+          item.total,
+        ]);
+
+        const [resVenta, resDetalle] = await Promise.all([
+          appendRowsToGoogleSheet(spreadsheetId, 'Venta', [filaVentaApi]),
+          appendRowsToGoogleSheet(spreadsheetId, 'DetalleVenta', filasDetalleApi),
+        ]);
+
+        if (resVenta.success && resDetalle.success) {
+          sincronizacionExitosa = true;
+          recordConsentLog(
+            'VENTA_SINCRONIZADA_API_V4',
+            'Google Sheets API v4',
+            `Orden ${codigoventa} insertada en hojas Venta y DetalleVenta. Cliente: ${ventaCompleta.nombre_entrega} | Total: ${moneda}${totalFinal}`
+          );
+        } else {
+          logSystemError({
+            title: 'GOOGLE_SHEETS_API_V4_ERROR',
+            pointOfFailure: 'sheets-service.ts -> registrarVenta() -> appendRowsToGoogleSheet()',
+            description: `Fallo al escribir en Google Sheets mediante API v4: Venta: ${resVenta.error || 'OK'}, Detalle: ${resDetalle.error || 'OK'}`,
+            error: { resVenta, resDetalle },
+          });
+        }
+      } catch (oauthErr) {
         logSystemError({
-          title: 'GOOGLE_SHEETS_PUSH_FALLIDO',
-          pointOfFailure: 'sheets-service.ts -> registrarVenta() -> fetch(webhookUrl)',
-          description: 'Fallaron los 3 reintentos de envío a Google Apps Script Webhook. La venta fue resguardada con éxito en la base de datos local.',
-          error: lastErr,
+          title: 'GOOGLE_SHEETS_API_V4_EXCEPTION',
+          pointOfFailure: 'sheets-service.ts -> registrarVenta() -> flujo OAuth',
+          description: 'Excepción durante la escritura con Google Sheets API v4.',
+          error: oauthErr,
         });
       }
-    } else {
-      logSystemError({
-        title: 'GOOGLE_SHEETS_PUSH_OMITIDO',
-        pointOfFailure: 'sheets-service.ts -> registrarVenta()',
-        description: 'No se envió la orden a Google Sheets porque APPS_SCRIPT_WEBHOOK_URL no está configurado en las variables de entorno. La orden quedó registrada en la base de datos local.',
-        error: `Orden: ${codigoventa} | Cliente: ${ventaCompleta.nombre_entrega} | Total: ${moneda}${totalFinal}`,
-      });
+    }
+
+    // 2. Si no se usó OAuth v4 o falló, intentar fallback con Webhook de Apps Script
+    if (!sincronizacionExitosa) {
+      const webhookUrl = process.env.APPS_SCRIPT_WEBHOOK_URL || import.meta.env?.APPS_SCRIPT_WEBHOOK_URL;
+      if (webhookUrl) {
+        const maxRetries = 3;
+        let attempt = 0;
+        let pushSuccess = false;
+        let lastErr: unknown = null;
+        while (attempt < maxRetries) {
+          try {
+            const res = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                op: 'venta',
+                batchUpdate: true,
+                ...ventaCompleta,
+              }),
+            });
+            if (res.ok) {
+              pushSuccess = true;
+              break;
+            }
+            lastErr = new Error(`HTTP ${res.status}: ${res.statusText}`);
+          } catch (fetchErr) {
+            lastErr = fetchErr;
+          }
+          attempt++;
+          const jitter = Math.random() * 200;
+          const delay = Math.pow(2, attempt) * 300 + jitter;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        if (!pushSuccess) {
+          logSystemError({
+            title: 'GOOGLE_SHEETS_PUSH_FALLIDO',
+            pointOfFailure: 'sheets-service.ts -> registrarVenta() -> fetch(webhookUrl)',
+            description: 'Fallaron los 3 reintentos de envío a Google Apps Script Webhook. La venta fue resguardada con éxito en la base de datos local.',
+            error: lastErr,
+          });
+        }
+      } else if (!isGoogleConnected()) {
+        logSystemError({
+          title: 'GOOGLE_SHEETS_SIN_CONEXION_CONFIGURADA',
+          pointOfFailure: 'sheets-service.ts -> registrarVenta()',
+          description: 'La orden quedó guardada localmente. Para sincronizarla en la nube, conecta tu cuenta de Google con un clic en /admin o configura APPS_SCRIPT_WEBHOOK_URL.',
+          error: `Orden: ${codigoventa} | Cliente: ${ventaCompleta.nombre_entrega} | Total: ${moneda}${totalFinal}`,
+        });
+      }
     }
 
     // Armar mensaje WhatsApp usando estrictamente Contactabilidad de Google Sheets

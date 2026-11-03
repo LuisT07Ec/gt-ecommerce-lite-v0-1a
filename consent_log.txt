@@ -1,0 +1,5 @@
+# REGISTRO DE CONSENTIMIENTO Y AUDITORÍA OAUTH2 (GOOGLE SHEETS)
+# Este archivo registra los consentimientos otorgados directamente por el titular de la tienda
+# a Google APIs. Los tokens y credenciales residen exclusivamente en el entorno local (.data/google_auth.json).
+# Los desarrolladores de GT E-commerce Lite no almacenan ni tienen acceso a las cuentas o datos de terceros.
+# ================================================================================

@@ -11,6 +11,7 @@ import {
   type AgenciaItem,
   type FormaPagoItem,
 } from '../../lib/sheets-service';
+import { isGoogleConnected, getGoogleAuthConfig } from '../../lib/google-auth';
 
 const sessionToken = Astro.cookies.get('admin_session')?.value;
 if (!validateSessionToken(sessionToken)) {
@@ -24,10 +25,19 @@ const agencias = (config.contentagencia || []) as AgenciaItem[];
 const pagos = (config.formas_pago || []) as FormaPagoItem[];
 const banners = (config.pagina_carrusel || []) as string[];
 
+const googleConnected = isGoogleConnected();
+const googleConf = getGoogleAuthConfig();
+
 const logFilePath = path.resolve(process.cwd(), 'error_log.txt');
 let errorLogContent = '';
 if (fs.existsSync(logFilePath)) {
   errorLogContent = fs.readFileSync(logFilePath, 'utf-8');
+}
+
+const consentLogPath = path.resolve(process.cwd(), 'consent_log.txt');
+let consentLogContent = '';
+if (fs.existsSync(consentLogPath)) {
+  consentLogContent = fs.readFileSync(consentLogPath, 'utf-8');
 }
 
 let totalProductos = 0;
@@ -154,6 +164,113 @@ const googleSheetUrl = activeSheetId
       </div>
     </section>
 
+    <!-- Conexión Directa con Google Sheets (OAuth 2.0 / Escritura sin Apps Script) -->
+    <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-5">
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <Icon name="verified_user" class="w-5 h-5 text-[#FF5722]" />
+              Conexión Directa de Escritura (Google OAuth 2.0)
+            </h2>
+            {googleConnected ? (
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
+                ● Conectado (Escritura Habilitada)
+              </span>
+            ) : (
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold">
+                ○ Desconectado (Solo Lectura)
+              </span>
+            )}
+          </div>
+          <p class="text-xs text-slate-400">
+            {googleConnected
+              ? `Vinculado con la cuenta: ${googleConf.email || 'Google Account'}. Los pedidos se escriben automáticamente en Venta y DetalleVenta vía Google Sheets API v4.`
+              : 'Conecta tu cuenta de Google con un clic para escribir ventas en tu hoja sin necesidad de Google Apps Script.'}
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          {googleConnected ? (
+            <button
+              type="button"
+              id="btnDisconnectGoogle"
+              class="px-4 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <Icon name="link_off" class="w-4 h-4" />
+              Desvincular Cuenta
+            </button>
+          ) : (
+            <div class="flex items-center gap-2">
+              {googleConf.clientId ? (
+                <a
+                  href="/api/auth/google/login"
+                  class="px-5 py-2.5 rounded-xl bg-[#4285F4] hover:bg-[#3367D6] text-white text-xs font-extrabold flex items-center gap-2 transition-all shadow-lg shadow-blue-950/50 cursor-pointer"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/>
+                  </svg>
+                  <span>Conectar con Google Sheets</span>
+                </a>
+              ) : null}
+              <button
+                type="button"
+                id="btnToggleCredentials"
+                class="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all border border-white/10 cursor-pointer"
+              >
+                <Icon name="key" class="w-4 h-4 text-amber-400" />
+                <span>Configurar Credenciales OAuth</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Formulario Desplegable para Configurar Client ID & Secret -->
+      <div id="credentialsForm" class="hidden p-4 rounded-xl bg-white/5 border border-white/10 space-y-3">
+        <div class="text-xs text-slate-300">
+          <strong>Credenciales de tu Proyecto en Google Cloud Console:</strong>
+          <p class="text-slate-400 mt-0.5">Ingresa tu Client ID y Client Secret para que la autenticación opere bajo tu propia titularidad.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <input
+            id="inputClientId"
+            type="text"
+            placeholder="Google Client ID (ej: 123...apps.googleusercontent.com)"
+            value={googleConf.clientId || ''}
+            class="w-full bg-[#181a22] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722]"
+          />
+          <input
+            id="inputClientSecret"
+            type="password"
+            placeholder="Google Client Secret"
+            value={googleConf.clientSecret || ''}
+            class="w-full bg-[#181a22] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722]"
+          />
+        </div>
+        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+          <p class="text-[11px] text-slate-400 font-mono">
+            URI de redirección en Google Cloud: <code class="px-1.5 py-0.5 rounded bg-black/40 text-amber-300">/api/auth/google/callback</code>
+          </p>
+          <button
+            type="button"
+            id="btnSaveCredentials"
+            class="px-4 py-2 rounded-xl bg-[#FF5722] hover:bg-[#e64a19] text-white text-xs font-bold cursor-pointer"
+          >
+            Guardar Credenciales
+          </button>
+        </div>
+      </div>
+
+      <!-- Garantía de Privacidad y Responsabilidad -->
+      <div class="p-3.5 rounded-xl bg-white/5 border border-white/5 flex items-start gap-3">
+        <Icon name="shield" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+        <div class="text-[11px] text-slate-300 leading-relaxed">
+          <strong>Privacidad y Descentralización:</strong> Tus tokens de acceso y actualización se almacenan exclusivamente en el servidor local de tu tienda (<code class="text-slate-200">.data/google_auth.json</code>). Ningún desarrollador ni servidor externo tiene acceso a tus hojas ni a tu cuenta.
+        </div>
+      </div>
+    </section>
+
     <!-- Pestañas Detectadas en Vivo -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Métodos de Entrega -->
@@ -193,6 +310,22 @@ const googleSheetUrl = activeSheetId
         </div>
       </div>
     </section>
+
+    <!-- Bitácora de Consentimiento OAuth2 y Auditoría (consent_log.txt) -->
+    {consentLogContent && (
+      <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-white text-sm uppercase tracking-wider flex items-center gap-2">
+            <Icon name="verified" class="w-4 h-4 text-emerald-400" />
+            Registro de Consentimiento y Sincronizaciones (consent_log.txt)
+          </h3>
+          <span class="text-[11px] text-emerald-400 font-bold">● Privado en tu Servidor</span>
+        </div>
+        <div class="p-4 rounded-xl bg-black/60 border border-white/10 font-mono text-xs text-slate-300 max-h-56 overflow-y-auto whitespace-pre-wrap select-all">
+          {consentLogContent}
+        </div>
+      </section>
+    )}
 
     <!-- Bitácora de Registro de Errores e Incidencias (error_log.txt) -->
     <section class="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
@@ -263,6 +396,77 @@ const googleSheetUrl = activeSheetId
         window.location.href = '/admin/login';
       }
     });
+  }
+
+  // Manejo de Google OAuth 2.0
+  const btnToggleCreds = document.getElementById('btnToggleCredentials');
+  const credsForm = document.getElementById('credentialsForm');
+  const btnSaveCreds = document.getElementById('btnSaveCredentials');
+  const btnDisconnect = document.getElementById('btnDisconnectGoogle');
+
+  btnToggleCreds?.addEventListener('click', () => {
+    credsForm?.classList.toggle('hidden');
+  });
+
+  btnSaveCreds?.addEventListener('click', async () => {
+    const clientId = (document.getElementById('inputClientId') as HTMLInputElement)?.value.trim();
+    const clientSecret = (document.getElementById('inputClientSecret') as HTMLInputElement)?.value.trim();
+
+    if (!clientId || !clientSecret) {
+      alert('Por favor ingresa tanto el Client ID como el Client Secret.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/google/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save_credentials', clientId, clientSecret }),
+      });
+      const data = await res.json();
+      if (res.ok && data.status === '0') {
+        alert('Credenciales guardadas exitosamente. Ya puedes presionar "Conectar con Google Sheets".');
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error guardando credenciales.');
+      }
+    } catch {
+      alert('Error de red al guardar credenciales.');
+    }
+  });
+
+  btnDisconnect?.addEventListener('click', async () => {
+    if (!confirm('¿Seguro que deseas desvincular tu cuenta de Google Sheets? Las nuevas ventas no se sincronizarán directamente hasta volver a conectar.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/google/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'disconnect' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.status === '0') {
+        alert('Cuenta desvinculada exitosamente.');
+        window.location.reload();
+      } else {
+        alert(data.message || 'Error al desvincular cuenta.');
+      }
+    } catch {
+      alert('Error de red al desvincular cuenta.');
+    }
+  });
+
+  // Notificaciones según URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('google_connected') === 'true') {
+    const email = urlParams.get('email');
+    alert(`¡Cuenta de Google conectada exitosamente! ${email ? `(${email})` : ''}\nLa escritura directa a Google Sheets está activa.`);
+    window.history.replaceState({}, document.title, '/admin');
+  } else if (urlParams.get('google_error')) {
+    alert(`Aviso de Google OAuth: ${decodeURIComponent(urlParams.get('google_error') || '')}`);
+    window.history.replaceState({}, document.title, '/admin');
   }
 </script>
 
