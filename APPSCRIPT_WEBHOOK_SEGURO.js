@@ -1,0 +1,91 @@
+/**
+ * ============================================================================
+ * WEBHOOK SEGURO DE REGISTRO DE VENTAS - WIGOO E-COMMERCE LITE
+ * Propósito: Recibir ventas confirmadas y registrar en Venta y DetalleVenta.
+ * 0 conexiones externas | 0 dependencias de terceros | 100% privado y seguro.
+ * ============================================================================
+ */
+
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(15000); // Evita colisiones de escritura simultánea
+
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return jsonResponse("-1", "Payload vacio o invalido");
+    }
+
+    var operacion = JSON.parse(e.postData.contents);
+
+    // Seguridad: Permitir UNICAMENTE la operacion "venta"
+    if (operacion.op !== "venta") {
+      return jsonResponse("-1", "Operacion no permitida");
+    }
+
+    return registrarVenta(operacion);
+  } catch (err) {
+    return jsonResponse("-1", "Error procesando venta: " + err.toString());
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function registrarVenta(venta) {
+  var sheetVenta = ss.getSheetByName("Venta");
+  var sheetDetalle = ss.getSheetByName("DetalleVenta");
+
+  if (!sheetVenta || !sheetDetalle) {
+    return jsonResponse("-1", "No se encontraron las pestañas Venta o DetalleVenta en la hoja");
+  }
+
+  // 1. Respetar el codigo de orden corto (max 9 caracteres) generado por la tienda
+  var codigoVenta = String(venta.idpedido || venta.codigo || venta.id || "WG-" + Utilities.formatDate(new Date(), "GMT", "yyMMddHHmm")).trim();
+  var fecha = venta.fecha || Utilities.formatDate(new Date(), "GMT", "yyyy-MM-dd");
+  var hora = venta.hora || Utilities.formatDate(new Date(), "GMT", "HH:mm:ss");
+
+  // 2. Inyectar fila en pestaña Venta
+  sheetVenta.appendRow([
+    codigoVenta,
+    fecha,
+    hora,
+    venta.nombre_entrega || "Consumidor Final",
+    venta.rut_entrega || "9999999999",
+    venta.telefono_entrega || "",
+    venta.correo_entrega || "",
+    venta.direccion_entrega || "",
+    venta.agencia_entrega || "Retiro en Local",
+    venta.moneda || "$",
+    Number(venta.total || 0),
+    JSON.stringify(venta),
+    Number(venta.costo_envio || 0),
+    venta.tiempo_entrega || "Inmediato",
+    "SOLICITADO",
+    ""
+  ]);
+
+  // 3. Inyectar items en pestaña DetalleVenta
+  var detalle = venta.detalle || [];
+  if (Array.isArray(detalle)) {
+    for (var i = 0; i < detalle.length; i++) {
+      var item = detalle[i];
+      sheetDetalle.appendRow([
+        codigoVenta,
+        item.nombre || "Producto",
+        item.categoria || "General",
+        Number(item.cantidad || 1),
+        Number(item.precio || 0),
+        Number(item.total || 0)
+      ]);
+    }
+  }
+
+  return jsonResponse("0", "Venta registrada con exito", codigoVenta);
+}
+
+function jsonResponse(status, message, idpedido) {
+  var payload = { status: status, message: message };
+  if (idpedido) payload.idpedido = idpedido;
+  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(ContentService.MimeType.JSON);
+}
