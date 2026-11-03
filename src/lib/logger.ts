@@ -50,3 +50,4 @@ export function logSystemError({ title, description, pointOfFailure, error }: Sy
     console.error('[LOGGER_FALLBACK] Error escribiendo en error_log.txt:', fsErr);
   }
 }
+

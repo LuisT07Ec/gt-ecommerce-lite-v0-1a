@@ -1,0 +1,28 @@
+================================================================================
+[2026-11-03T12:51:04.675Z] [ERROR] SEGURIDAD_CARACTERES_PROHIBIDOS
+PUNTO DE FALLO: api/orders/index.ts -> Campo "Nombre y Apellidos"
+DESCRIPCIÓN:    Se detectaron caracteres prohibidos de inyección en el campo "Nombre y Apellidos".
+DETALLE TÉCNICO:
+Valor recibido: Hacker <script>/*test*/</script>
+================================================================================
+================================================================================
+[2026-11-03T12:51:22.288Z] [ERROR] GOOGLE_SHEETS_PUSH_OMITIDO
+PUNTO DE FALLO: sheets-service.ts -> registrarVenta()
+DESCRIPCIÓN:    No se envió la orden a Google Sheets porque APPS_SCRIPT_WEBHOOK_URL no está configurado en las variables de entorno. La orden quedó registrada en la base de datos local.
+DETALLE TÉCNICO:
+Orden: WG-N8U6XL | Cliente: Juan Perez | Total: $9
+================================================================================
+================================================================================
+[2026-11-03T15:42:43.648Z] [ERROR] GOOGLE_SHEETS_PUSH_OMITIDO
+PUNTO DE FALLO: sheets-service.ts -> registrarVenta()
+DESCRIPCIÓN:    No se envió la orden a Google Sheets porque APPS_SCRIPT_WEBHOOK_URL no está configurado en las variables de entorno. La orden quedó registrada en la base de datos local.
+DETALLE TÉCNICO:
+Orden: WG-CXCBDF | Cliente: Luis Tituaña | Total: $313.38
+================================================================================
+================================================================================
+[2026-11-03T15:46:37.085Z] [ERROR] GOOGLE_SHEETS_PUSH_OMITIDO
+PUNTO DE FALLO: sheets-service.ts -> registrarVenta()
+DESCRIPCIÓN:    No se envió la orden a Google Sheets porque APPS_SCRIPT_WEBHOOK_URL no está configurado en las variables de entorno. La orden quedó registrada en la base de datos local.
+DETALLE TÉCNICO:
+Orden: WG-3DZL27 | Cliente: JUAN PEREZ | Total: $40.5
+================================================================================
