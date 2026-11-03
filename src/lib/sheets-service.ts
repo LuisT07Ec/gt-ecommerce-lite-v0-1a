@@ -1,12 +1,52 @@
-export function generateUUID(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
+import { logSystemError } from './logger';
+
+/**
+ * Generador de código de pedido alfanumérico limpio de máximo 9 caracteres.
+ * Formato: WG-XXXXXX (ej: WG-8K2M9P)
+ */
+export function generateShortOrderId(): string {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let randomPart = '';
+  for (let i = 0; i < 6; i++) {
+    const idx = (Math.random() * chars.length) | 0;
+    randomPart += chars[idx];
   }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return `WG-${randomPart}`;
+}
+
+export function generateUUID(): string {
+  return generateShortOrderId();
+}
+
+/**
+ * Valida si un cupón ha expirado contra la fecha del sistema
+ */
+export function isCouponExpired(fechaMaxStr: string): boolean {
+  if (!fechaMaxStr || typeof fechaMaxStr !== 'string') return false;
+  try {
+    const cleanStr = fechaMaxStr.trim();
+    if (!cleanStr) return false;
+    let targetDate: Date | null = null;
+    const parts = cleanStr.split(/[/-]/);
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        // YYYY/MM/DD
+        targetDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59, 999);
+      } else {
+        // DD/MM/YYYY
+        targetDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]), 23, 59, 59, 999);
+      }
+    } else {
+      targetDate = new Date(cleanStr);
+    }
+    if (targetDate && !isNaN(targetDate.getTime())) {
+      const now = new Date();
+      return now.getTime() > targetDate.getTime();
+    }
+  } catch {
+    return false;
+  }
+  return false;
 }
 
 export interface VariedadItem {
@@ -145,6 +185,10 @@ const RAW_CONFIGURACION_DEFAULT = {
   TipoFormato: 'es-EC',
   Decimales: 2,
   Favicon: '/favicon.svg',
+  DescuentoActivo: false,
+  CodigoDescuento: '',
+  PorcentajeDescuento: 0,
+  FechaMaximoDescuento: '',
 };
 
 const RAW_FORMA_PAGO_DEFAULT: FormaPagoItem[] = [
@@ -530,19 +574,32 @@ export async function listarConfiguracion(idPedido?: string, forceRefresh: boole
       ]);
 
       if (confData && confData.length >= 2) {
-        for (const row of confData) {
-          const k = (row[0] || '').trim();
+        for (let i = 0; i < confData.length; i++) {
+          const row = confData[i];
+          const rawKey = (row[0] || '').trim();
+          const k = rawKey.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
           const v = (row[1] || '').trim();
-          if (!k || !v) continue;
-          if (k.toLowerCase() === 'logo') conf.Logo = v;
-          if (k.toLowerCase() === 'nombre') conf.Nombre = v;
-          if (k.toLowerCase() === 'url') conf.URL = v;
-          if (k.toLowerCase() === 'carrusel') conf.Carrusel = v;
-          if (k.toLowerCase() === 'contactabilidad') conf.Contactabilidad = v;
-          if (k.toLowerCase() === 'moneda') conf.Moneda = v;
-          if (k.toLowerCase() === 'tipoformato') conf.TipoFormato = v;
-          if (k.toLowerCase() === 'decimales') conf.Decimales = Number(v) || 2;
-          if (k.toLowerCase() === 'favicon') conf.Favicon = v;
+          if (!k && !v) continue;
+
+          if (k === 'logo') conf.Logo = v;
+          else if (k === 'nombre') conf.Nombre = v;
+          else if (k.includes('nombre comercial')) conf.NombreComercial = v;
+          else if (k === 'url') conf.URL = v;
+          else if (k.includes('carrusel')) conf.Carrusel = v;
+          else if (k.includes('contactabilidad')) conf.Contactabilidad = v;
+          else if (k.includes('moneda')) conf.Moneda = v;
+          else if (k.includes('tipoformato') || k.includes('formato')) conf.TipoFormato = v;
+          else if (k.includes('decimal')) conf.Decimales = Number(v) || 2;
+          else if (k.includes('favicon')) conf.Favicon = v;
+          else if (k.includes('descuento activo') || k === 'activo' || i === 11) {
+            conf.DescuentoActivo = v.toLowerCase() === 'verdadero' || v.toLowerCase() === 'true' || v === '1';
+          } else if (k.includes('codigo descuento') || k.includes('codigo') || i === 12) {
+            conf.CodigoDescuento = v.toUpperCase();
+          } else if (k.includes('porcentaje descuento') || k.includes('porcentaje') || i === 13) {
+            conf.PorcentajeDescuento = parseFloat(v.replace('%', '').trim()) || 0;
+          } else if (k.includes('fecha maximo') || k.includes('fecha') || i === 14) {
+            conf.FechaMaximoDescuento = v;
+          }
         }
       }
 
@@ -716,6 +773,13 @@ export async function listarConfiguracion(idPedido?: string, forceRefresh: boole
     content: dataArray,
     contentagencia: agencias,
     spreadsheet_id: spreadsheetId || 'NO_CONFIGURADO',
+    cupon: {
+      activo: Boolean(conf.DescuentoActivo),
+      codigo: String(conf.CodigoDescuento || '').trim().toUpperCase(),
+      porcentaje: Number(conf.PorcentajeDescuento) || 0,
+      fecha_maximo: String(conf.FechaMaximoDescuento || '').trim(),
+      expirado: isCouponExpired(String(conf.FechaMaximoDescuento || '')),
+    },
   };
 
   cachedConfigData = respuesta;
@@ -787,7 +851,7 @@ export async function registrarVenta(ventaInput: VentaPayload) {
   try {
     const db = readLocalDB();
     const isEdit = ventaInput.operacion === 'e' && Boolean(ventaInput.id);
-    const codigoventa = isEdit && ventaInput.id ? String(ventaInput.id) : generateUUID();
+    const codigoventa = isEdit && ventaInput.id ? String(ventaInput.id) : generateShortOrderId();
     let backupEdicion = '';
 
     if (isEdit) {
@@ -912,6 +976,8 @@ export async function registrarVenta(ventaInput: VentaPayload) {
     if (webhookUrl) {
       const maxRetries = 3;
       let attempt = 0;
+      let pushSuccess = false;
+      let lastErr: unknown = null;
       while (attempt < maxRetries) {
         try {
           const res = await fetch(webhookUrl, {
@@ -923,15 +989,35 @@ export async function registrarVenta(ventaInput: VentaPayload) {
               ...ventaCompleta,
             }),
           });
-          if (res.ok) break;
-        } catch {
-          // Fallo transitorio
+          if (res.ok) {
+            pushSuccess = true;
+            break;
+          }
+          lastErr = new Error(`HTTP ${res.status}: ${res.statusText}`);
+        } catch (fetchErr) {
+          lastErr = fetchErr;
         }
         attempt++;
         const jitter = Math.random() * 200;
         const delay = Math.pow(2, attempt) * 300 + jitter;
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
+
+      if (!pushSuccess) {
+        logSystemError({
+          title: 'GOOGLE_SHEETS_PUSH_FALLIDO',
+          pointOfFailure: 'sheets-service.ts -> registrarVenta() -> fetch(webhookUrl)',
+          description: 'Fallaron los 3 reintentos de envío a Google Apps Script Webhook. La venta fue resguardada con éxito en la base de datos local.',
+          error: lastErr,
+        });
+      }
+    } else {
+      logSystemError({
+        title: 'GOOGLE_SHEETS_PUSH_OMITIDO',
+        pointOfFailure: 'sheets-service.ts -> registrarVenta()',
+        description: 'No se envió la orden a Google Sheets porque APPS_SCRIPT_WEBHOOK_URL no está configurado en las variables de entorno. La orden quedó registrada en la base de datos local.',
+        error: `Orden: ${codigoventa} | Cliente: ${ventaCompleta.nombre_entrega} | Total: ${moneda}${totalFinal}`,
+      });
     }
 
     // Armar mensaje WhatsApp usando estrictamente Contactabilidad de Google Sheets
@@ -972,6 +1058,12 @@ export async function registrarVenta(ventaInput: VentaPayload) {
       whatsapp_url: whatsappUrl,
     };
   } catch (error) {
+    logSystemError({
+      title: 'REGISTRO_VENTA_EXCEPCION',
+      pointOfFailure: 'sheets-service.ts -> registrarVenta()',
+      description: 'Ocurrió un error inesperado al procesar la venta.',
+      error,
+    });
     return {
       status: '-1',
       message: error instanceof Error ? error.message : String(error),

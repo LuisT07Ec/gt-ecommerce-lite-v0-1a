@@ -80,8 +80,10 @@ import Icon from './Icon.astro';
               name="nombre_entrega"
               type="text"
               required
+              maxlength="30"
               autocomplete="name"
               placeholder="Ej: Juan Pérez"
+              oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
               class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
             />
             <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
@@ -103,7 +105,9 @@ import Icon from './Icon.astro';
                 name="rut_entrega"
                 type="text"
                 required
+                maxlength="30"
                 placeholder="10 o 13 dígitos"
+                oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
                 class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
               />
               <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
@@ -126,9 +130,13 @@ import Icon from './Icon.astro';
                 id="orderCustomerPhone"
                 name="telefono_entrega"
                 type="tel"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="30"
                 required
                 autocomplete="tel"
                 placeholder="0990000000"
+                oninput="this.value = this.value.replace(/\D/g, '')"
                 class="w-full bg-transparent text-white text-sm px-3 py-2.5 placeholder-slate-500 focus:outline-none"
               />
             </div>
@@ -146,8 +154,10 @@ import Icon from './Icon.astro';
               name="correo_entrega"
               type="email"
               required
+              maxlength="30"
               autocomplete="email"
               placeholder="cliente@ejemplo.com"
+              oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
               class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
             />
             <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
@@ -167,8 +177,10 @@ import Icon from './Icon.astro';
               name="direccion_entrega"
               type="text"
               required
+              maxlength="50"
               autocomplete="street-address"
               placeholder="Calle principal, número, ciudad y referencia"
+              oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
               class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
             />
             <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
@@ -238,7 +250,7 @@ import Icon from './Icon.astro';
           <div class="flex items-center justify-center gap-2 text-center">
             <Icon name="lock" class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <p class="text-[11px] text-slate-400">
-              Registra tu orden con código único UUID y abre el WhatsApp de la tienda.
+              Registra tu orden con código único y abre el WhatsApp de la tienda.
             </p>
           </div>
         </div>

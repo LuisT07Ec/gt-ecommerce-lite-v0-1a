@@ -15,6 +15,19 @@ const storeLogo = String(configData.pagina_logo || '/fotos/logo-wigoo.svg');
 const faviconUrl = String(configData.pagina_favicon || '/favicon.svg');
 const whatsappNumber = String(configData.contactabilidad || '');
 const categories = (configData.content || []) as CategoriaCatalogo[];
+const cuponConfig = (configData.cupon || {
+  activo: false,
+  codigo: '',
+  porcentaje: 0,
+  fecha_maximo: '',
+  expirado: false,
+}) as {
+  activo: boolean;
+  codigo: string;
+  porcentaje: number;
+  fecha_maximo: string;
+  expirado: boolean;
+};
 ---
 
 <BaseLayout
@@ -142,10 +155,12 @@ const categories = (configData.content || []) as CategoriaCatalogo[];
             </div>
             <div>
               <h3 class="text-xs font-bold text-white uppercase tracking-wider">
-                ¿Tienes un cupón mayorista?
+                ¿Tienes un cupón de descuento?
               </h3>
               <p class="text-[11px] text-slate-400">
-                Usa <strong class="text-white">WIGOO10</strong> para obtener 10% de descuento en tu lote.
+                {cuponConfig.activo && !cuponConfig.expirado
+                  ? `Digita tu código para recibir ${cuponConfig.porcentaje}% de descuento en tu orden.`
+                  : 'Ingresa tu código de descuento promocional si dispones de uno.'}
               </p>
             </div>
           </div>
@@ -155,7 +170,10 @@ const categories = (configData.content || []) as CategoriaCatalogo[];
             <input
               id="couponCodeInput"
               type="text"
-              placeholder="Ej: WIGOO10"
+              maxlength="12"
+              placeholder="Ingresa cupón"
+              autocomplete="off"
+              oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')"
               class="w-full sm:w-44 px-3.5 py-2.5 text-xs uppercase font-bold rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722]"
             />
             <button
@@ -311,6 +329,12 @@ const categories = (configData.content || []) as CategoriaCatalogo[];
     id="wigooCatalogData"
     type="application/json"
     set:html={JSON.stringify(categories)}
+  />
+
+  <script
+    id="wigooCuponData"
+    type="application/json"
+    set:html={JSON.stringify(cuponConfig)}
   />
 
   <script>
@@ -511,18 +535,74 @@ const categories = (configData.content || []) as CategoriaCatalogo[];
       clearCart();
     });
 
+    const rawCupon = document.getElementById('wigooCuponData')?.textContent || '{}';
+    let cuponConfig: {
+      activo: boolean;
+      codigo: string;
+      porcentaje: number;
+      fecha_maximo: string;
+      expirado: boolean;
+    };
+    try {
+      cuponConfig = JSON.parse(rawCupon);
+    } catch {
+      cuponConfig = { activo: false, codigo: '', porcentaje: 0, fecha_maximo: '', expirado: false };
+    }
+
+    const couponInput = document.getElementById('couponCodeInput') as HTMLInputElement | null;
+
+    couponInput?.addEventListener('input', () => {
+      couponInput.value = couponInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    });
+
     document.getElementById('applyCouponBtn')?.addEventListener('click', () => {
-      const input = document.getElementById('couponCodeInput') as HTMLInputElement | null;
-      const code = input?.value.trim().toUpperCase() || '';
+      const rawVal = couponInput?.value || '';
+      const code = rawVal.trim().toUpperCase();
       const cart = getCart();
-      if (code === 'WIGOO10' || code === 'MAYORISTA') {
-        cart.descuento = Number(((cart.subtotal || 0) * 0.1).toFixed(2));
-        saveCart(cart);
-      } else {
+
+      if (!code) {
+        alert('Por favor ingresa un código de cupón.');
+        return;
+      }
+
+      // Validación de seguridad: máximo 12 caracteres y solo alfanumérico
+      if (code.length > 12 || /[^A-Z0-9]/.test(code)) {
+        alert('Código inválido: solo se permiten letras y números (máximo 12 caracteres).');
+        if (couponInput) couponInput.value = '';
+        return;
+      }
+
+      // Regla de Negocio: Validar estado activo de la celda B12
+      if (!cuponConfig.activo) {
         cart.descuento = 0;
         saveCart(cart);
-        alert('Cupón no válido. Usa el código WIGOO10 para un 10% de descuento mayorista.');
+        alert('El código de descuento ingresado se encuentra inactivo.');
+        return;
       }
+
+      // Regla de Negocio: Validar fecha máxima de la celda B15
+      if (cuponConfig.expirado) {
+        cart.descuento = 0;
+        saveCart(cart);
+        alert('El código de descuento ha expirado.');
+        return;
+      }
+
+      // Regla de Negocio: Validar coincidencia del código con celda B13
+      if (code !== (cuponConfig.codigo || '').toUpperCase()) {
+        cart.descuento = 0;
+        saveCart(cart);
+        alert('El código de descuento no es válido.');
+        return;
+      }
+
+      // Aplicar descuento con el porcentaje configurado en celda B14
+      const pct = Number(cuponConfig.porcentaje) || 0;
+      const subtotal = Number(cart.subtotal) || 0;
+      const descuentoCalculado = Number(((subtotal * pct) / 100).toFixed(2));
+      cart.descuento = descuentoCalculado;
+      saveCart(cart);
+      alert(`¡Cupón aplicado exitosamente! Has obtenido un ${pct}% de descuento en tu compra.`);
     });
 
     window.addEventListener('wigoo:cart-updated', renderCartPage);

@@ -407,6 +407,52 @@ export function initStorefront(catalogCategories: CategoriaCatalogo[] = []) {
       return;
     }
 
+    const forbiddenPattern = /[/*[\]{}()]/;
+    if (
+      forbiddenPattern.test(nameVal) ||
+      forbiddenPattern.test(docVal) ||
+      forbiddenPattern.test(addrVal) ||
+      forbiddenPattern.test(emailVal)
+    ) {
+      if (alertBox) {
+        alertBox.textContent = 'Error: No se permiten caracteres especiales como /*[]{}() en los campos.';
+        alertBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (addrVal.length > 50) {
+      if (alertBox) {
+        alertBox.textContent = 'La Dirección de Entrega no puede superar los 50 caracteres.';
+        alertBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (nameVal.length > 30 || docVal.length > 30 || emailVal.length > 30) {
+      if (alertBox) {
+        alertBox.textContent = 'Los campos Nombre, Documento y Correo no pueden superar los 30 caracteres.';
+        alertBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (!/^\d+$/.test(phoneVal)) {
+      if (alertBox) {
+        alertBox.textContent = 'El teléfono solo debe contener números.';
+        alertBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    if (phoneVal.length > 30) {
+      if (alertBox) {
+        alertBox.textContent = 'El teléfono no puede superar los 30 dígitos.';
+        alertBox.classList.remove('hidden');
+      }
+      return;
+    }
+
     if (alertBox) alertBox.classList.add('hidden');
     if (submitBtn) submitBtn.disabled = true;
     if (submitBtnText) submitBtnText.textContent = 'Registrando pedido...';
