@@ -4,3 +4,10 @@
 # Los desarrolladores de GT E-commerce Lite no almacenan ni tienen acceso a las cuentas o datos de terceros.
 # ================================================================================
 
+================================================================================
+[2026-11-03T19:14:40.590Z] [CONSENTIMIENTO_OAUTH2] VENTA_REGISTRADA_EN_GOOGLE_SHEETS
+CUENTA AUTORIZADA: Webhook Apps Script
+DETALLE:           Orden WG-QBJYJ9 registrada exitosamente en las pestañas Venta y DetalleVenta. Cliente: Luis Tituaña | Total: $46.5
+RESPONSABILIDAD:   Consentimiento otorgado directamente por el usuario titular a Google.
+                   El software GT E-commerce Lite opera 100% descentralizado.
+================================================================================

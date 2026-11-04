@@ -62,10 +62,26 @@ const COPY_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_MAESTRO_I
         </a>
       </div>
 
-      <div id="statusAlertBox" class="p-4 rounded-xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono space-y-1">
+      <div id="statusAlertBox" class="p-4 rounded-xl bg-black/40 border border-white/10 text-xs text-slate-300 font-mono space-y-2">
         <p><strong>Hoja Activa:</strong> <span id="activeSheetDisplay">{currentSheetId || 'Ninguna (usando catálogo base de demostración)'}</span></p>
+        {initialValidation?.storeName && (
+          <p><strong>Nombre de Tienda:</strong> <span class="text-white font-bold">{initialValidation.storeName}</span></p>
+        )}
         {initialValidation?.contactabilidad && (
-          <p><strong>WhatsApp Detectado en Hoja:</strong> <span class="text-emerald-400">+{initialValidation.contactabilidad}</span></p>
+          <p><strong>WhatsApp Detectado en Hoja:</strong> <span class="text-emerald-400 font-bold">+{initialValidation.contactabilidad}</span></p>
+        )}
+        {initialValidation?.valido && (
+          <div class="pt-2 border-t border-white/10">
+            <p class="text-emerald-400 font-bold text-[11px] mb-1">Estructura Interna Verificada (6/6 Hojas Activas):</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
+              <span class="text-slate-300">✅ Configuracion</span>
+              <span class="text-slate-300">✅ Producto</span>
+              <span class="text-slate-300">✅ Agencia</span>
+              <span class="text-slate-300">✅ FormaPago</span>
+              <span class="text-slate-300">✅ Venta</span>
+              <span class="text-slate-300">✅ DetalleVenta</span>
+            </div>
+          </div>
         )}
       </div>
     </section>
@@ -228,6 +244,17 @@ const COPY_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_MAESTRO_I
               <p>• La tienda está conectada y sincronizada con Google Sheets.</p>
               <p>• Nombre de tienda: <strong>${data.validacion?.storeName || 'Tienda Conectada'}</strong></p>
               <p>• WhatsApp detectado en hoja: <strong>+${data.validacion?.contactabilidad || 'No configurado'}</strong></p>
+              <div class="pt-2 border-t border-emerald-500/20">
+                <p class="font-bold text-[11px] mb-1">Estructura Interna Verificada (6/6 Hojas Activas):</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1 text-[11px] text-slate-200">
+                  <span>✅ Configuracion</span>
+                  <span>✅ Producto</span>
+                  <span>✅ Agencia</span>
+                  <span>✅ FormaPago</span>
+                  <span>✅ Venta</span>
+                  <span>✅ DetalleVenta</span>
+                </div>
+              </div>
             `;
             if (activeSheetDisplay) activeSheetDisplay.textContent = sheetId;
           } else {

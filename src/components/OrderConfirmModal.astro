@@ -71,57 +71,69 @@ import Icon from './Icon.astro';
       <form id="orderConfirmForm" class="space-y-3.5" novalidate>
         <!-- Field 1: Nombre y Apellidos -->
         <div class="space-y-1">
-          <label for="orderCustomerName" class="block text-xs font-bold uppercase tracking-wider text-white">
-            Nombre y Apellidos <span class="text-[#FF5722]">*</span>
-          </label>
+          <div class="flex items-center justify-between">
+            <label for="orderCustomerName" class="block text-xs font-bold uppercase tracking-wider text-white">
+              Nombre y Apellidos <span class="text-[#FF5722]">*</span>
+            </label>
+            <span class="text-[10px] text-slate-400">Máx. 50 caracteres (solo letras)</span>
+          </div>
           <div class="relative">
             <input
               id="orderCustomerName"
               name="nombre_entrega"
               type="text"
               required
-              maxlength="30"
+              maxlength="50"
               autocomplete="name"
               placeholder="Ej: Juan Pérez"
-              oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
+              oninput="this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '').slice(0, 50)"
               class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
             />
             <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
               <Icon name="person" class="w-4 h-4" />
             </span>
           </div>
+          <p id="errorCustomerName" class="text-[11px] text-rose-400 font-medium hidden error-feedback"></p>
         </div>
 
         <!-- Row: Cédula/RUC & Teléfono -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <!-- Field 2: Cédula / RUC (Documento) -->
           <div class="space-y-1">
-            <label for="orderCustomerDoc" class="block text-xs font-bold uppercase tracking-wider text-white">
-              Cédula / RUC (Documento) <span class="text-[#FF5722]">*</span>
-            </label>
+            <div class="flex items-center justify-between">
+              <label for="orderCustomerDoc" class="block text-xs font-bold uppercase tracking-wider text-white">
+                Cédula / RUC <span class="text-[#FF5722]">*</span>
+              </label>
+              <span class="text-[10px] text-slate-400">10 o 13 dígitos</span>
+            </div>
             <div class="relative">
               <input
                 id="orderCustomerDoc"
                 name="rut_entrega"
                 type="text"
+                inputmode="numeric"
                 required
-                maxlength="30"
-                placeholder="10 o 13 dígitos"
-                oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
+                maxlength="13"
+                placeholder="10 dígitos o RUC (...001)"
+                oninput="this.value = this.value.replace(/\D/g, '').slice(0, 13)"
                 class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
               />
               <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
                 <Icon name="badge" class="w-4 h-4" />
               </span>
             </div>
+            <p id="errorCustomerDoc" class="text-[11px] text-rose-400 font-medium hidden error-feedback"></p>
           </div>
 
           <!-- Field 3: Teléfono WhatsApp -->
           <div class="space-y-1">
-            <label for="orderCustomerPhone" class="block text-xs font-bold uppercase tracking-wider text-white">
-              Teléfono (WhatsApp) <span class="text-[#FF5722]">*</span>
-            </label>
-            <div class="flex rounded-xl overflow-hidden bg-[#181a22] border border-white/10 focus-within:border-[#FF5722] focus-within:ring-1 focus-within:ring-[#FF5722] transition-all">
+            <div class="flex items-center justify-between">
+              <label for="orderCustomerPhone" class="block text-xs font-bold uppercase tracking-wider text-white">
+                Teléfono WhatsApp <span class="text-[#FF5722]">*</span>
+              </label>
+              <span class="text-[10px] text-slate-400">10 dígitos</span>
+            </div>
+            <div id="phoneInputContainer" class="flex rounded-xl overflow-hidden bg-[#181a22] border border-white/10 focus-within:border-[#FF5722] focus-within:ring-1 focus-within:ring-[#FF5722] transition-all">
               <span class="inline-flex items-center gap-1 px-2.5 bg-white/5 border-r border-white/10 text-xs font-bold text-slate-300 select-none">
                 <span>🇪🇨</span>
                 <span>+593</span>
@@ -132,61 +144,70 @@ import Icon from './Icon.astro';
                 type="tel"
                 inputmode="numeric"
                 pattern="[0-9]*"
-                maxlength="30"
+                maxlength="10"
                 required
                 autocomplete="tel"
                 placeholder="0990000000"
-                oninput="this.value = this.value.replace(/\D/g, '')"
+                oninput="this.value = this.value.replace(/\D/g, '').slice(0, 10)"
                 class="w-full bg-transparent text-white text-sm px-3 py-2.5 placeholder-slate-500 focus:outline-none"
               />
             </div>
+            <p id="errorCustomerPhone" class="text-[11px] text-rose-400 font-medium hidden error-feedback"></p>
           </div>
         </div>
 
         <!-- Field 4: Correo Electrónico -->
         <div class="space-y-1">
-          <label for="orderCustomerEmail" class="block text-xs font-bold uppercase tracking-wider text-white">
-            Correo Electrónico <span class="text-[#FF5722]">*</span>
-          </label>
+          <div class="flex items-center justify-between">
+            <label for="orderCustomerEmail" class="block text-xs font-bold uppercase tracking-wider text-white">
+              Correo Electrónico <span class="text-[#FF5722]">*</span>
+            </label>
+            <span class="text-[10px] text-slate-400">ejemplo@correo.com</span>
+          </div>
           <div class="relative">
             <input
               id="orderCustomerEmail"
               name="correo_entrega"
               type="email"
               required
-              maxlength="30"
+              maxlength="50"
               autocomplete="email"
               placeholder="cliente@ejemplo.com"
-              oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
+              oninput="this.value = this.value.replace(/[\/\*\[\]{}()\s]/g, '').slice(0, 50)"
               class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
             />
             <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
               <Icon name="alternate_email" class="w-4 h-4" />
             </span>
           </div>
+          <p id="errorCustomerEmail" class="text-[11px] text-rose-400 font-medium hidden error-feedback"></p>
         </div>
 
         <!-- Field 5: Dirección de Entrega -->
         <div class="space-y-1">
-          <label for="orderCustomerAddress" class="block text-xs font-bold uppercase tracking-wider text-white">
-            Dirección de Entrega <span class="text-[#FF5722]">*</span>
-          </label>
+          <div class="flex items-center justify-between">
+            <label for="orderCustomerAddress" class="block text-xs font-bold uppercase tracking-wider text-white">
+              Dirección de Entrega <span class="text-[#FF5722]">*</span>
+            </label>
+            <span class="text-[10px] text-slate-400">Máx. 100 caracteres (letras, núm. y guion -)</span>
+          </div>
           <div class="relative">
             <input
               id="orderCustomerAddress"
               name="direccion_entrega"
               type="text"
               required
-              maxlength="50"
+              maxlength="100"
               autocomplete="street-address"
-              placeholder="Calle principal, número, ciudad y referencia"
-              oninput="this.value = this.value.replace(/[\/\*\[\]{}()]/g, '')"
+              placeholder="Calle principal, número de casa/edificio y referencia"
+              oninput="this.value = this.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s\-]/g, '').slice(0, 100)"
               class="w-full bg-[#181a22] border border-white/10 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition-all"
             />
             <span class="absolute right-3.5 top-2.5 text-slate-400 pointer-events-none">
               <Icon name="location_on" class="w-4 h-4" />
             </span>
           </div>
+          <p id="errorCustomerAddress" class="text-[11px] text-rose-400 font-medium hidden error-feedback"></p>
         </div>
 
         <!-- Row: Agencia de Envío & Forma de Pago -->

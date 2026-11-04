@@ -89,3 +89,4 @@ function jsonResponse(status, message, idpedido) {
   if (idpedido) payload.idpedido = idpedido;
   return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(ContentService.MimeType.JSON);
 }
+

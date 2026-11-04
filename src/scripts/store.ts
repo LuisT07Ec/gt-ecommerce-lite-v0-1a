@@ -370,27 +370,75 @@ export function initStorefront(catalogCategories: CategoriaCatalogo[] = []) {
 
   // Order Form Submission -> Astro Proxy API -> WhatsApp + Order Success Redirect
   const orderForm = document.getElementById('orderConfirmForm') as HTMLFormElement | null;
+
+  // Limpiar errores en tiempo real al escribir
+  const fieldConfigs = [
+    { inputId: 'orderCustomerName', errorId: 'errorCustomerName' },
+    { inputId: 'orderCustomerDoc', errorId: 'errorCustomerDoc' },
+    { inputId: 'orderCustomerPhone', errorId: 'errorCustomerPhone', containerId: 'phoneInputContainer' },
+    { inputId: 'orderCustomerEmail', errorId: 'errorCustomerEmail' },
+    { inputId: 'orderCustomerAddress', errorId: 'errorCustomerAddress' },
+  ];
+
+  fieldConfigs.forEach(({ inputId, errorId, containerId }) => {
+    const inputEl = document.getElementById(inputId) as HTMLInputElement | null;
+    const errorEl = document.getElementById(errorId);
+    const containerEl = containerId ? document.getElementById(containerId) : null;
+    inputEl?.addEventListener('input', () => {
+      if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+      }
+      if (containerEl) {
+        containerEl.classList.remove('border-rose-500');
+        containerEl.classList.add('border-white/10');
+      } else if (inputEl) {
+        inputEl.classList.remove('border-rose-500');
+        inputEl.classList.add('border-white/10');
+      }
+    });
+  });
+
   orderForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const alertBox = document.getElementById('orderFormAlert');
     const submitBtn = document.getElementById('submitOrderBtn') as HTMLButtonElement | null;
     const submitBtnText = document.getElementById('submitOrderBtnText');
 
-    const nameVal = (
-      document.getElementById('orderCustomerName') as HTMLInputElement | null
-    )?.value.trim() || '';
-    const docVal = (
-      document.getElementById('orderCustomerDoc') as HTMLInputElement | null
-    )?.value.trim() || '';
-    const phoneVal = (
-      document.getElementById('orderCustomerPhone') as HTMLInputElement | null
-    )?.value.trim() || '';
-    const emailVal = (
-      document.getElementById('orderCustomerEmail') as HTMLInputElement | null
-    )?.value.trim() || '';
-    const addrVal = (
-      document.getElementById('orderCustomerAddress') as HTMLInputElement | null
-    )?.value.trim() || '';
+    const nameInput = document.getElementById('orderCustomerName') as HTMLInputElement | null;
+    const docInput = document.getElementById('orderCustomerDoc') as HTMLInputElement | null;
+    const phoneInput = document.getElementById('orderCustomerPhone') as HTMLInputElement | null;
+    const phoneContainer = document.getElementById('phoneInputContainer');
+    const emailInput = document.getElementById('orderCustomerEmail') as HTMLInputElement | null;
+    const addrInput = document.getElementById('orderCustomerAddress') as HTMLInputElement | null;
+
+    const errorName = document.getElementById('errorCustomerName');
+    const errorDoc = document.getElementById('errorCustomerDoc');
+    const errorPhone = document.getElementById('errorCustomerPhone');
+    const errorEmail = document.getElementById('errorCustomerEmail');
+    const errorAddr = document.getElementById('errorCustomerAddress');
+
+    // Resetear todos los errores antes de convalidar
+    [errorName, errorDoc, errorPhone, errorEmail, errorAddr].forEach((el) => {
+      if (el) {
+        el.textContent = '';
+        el.classList.add('hidden');
+      }
+    });
+    [nameInput, docInput, emailInput, addrInput].forEach((el) => {
+      el?.classList.remove('border-rose-500');
+      el?.classList.add('border-white/10');
+    });
+    if (phoneContainer) {
+      phoneContainer.classList.remove('border-rose-500');
+      phoneContainer.classList.add('border-white/10');
+    }
+
+    const nameVal = nameInput?.value.trim() || '';
+    const docVal = docInput?.value.trim() || '';
+    const phoneVal = phoneInput?.value.trim() || '';
+    const emailVal = emailInput?.value.trim() || '';
+    const addrVal = addrInput?.value.trim() || '';
     const shipVal =
       (document.getElementById('orderCustomerShipping') as HTMLSelectElement | null)?.value ||
       'PASO RETIRAR';
@@ -398,58 +446,98 @@ export function initStorefront(catalogCategories: CategoriaCatalogo[] = []) {
       (document.getElementById('orderCustomerPayment') as HTMLSelectElement | null)?.value ||
       'Transferencia';
 
-    if (!nameVal || !docVal || !phoneVal || !emailVal || !addrVal) {
-      if (alertBox) {
-        alertBox.textContent =
-          'Por favor completa todos los campos obligatorios: Nombre, Cédula/RUC, Teléfono, Correo y Dirección.';
-        alertBox.classList.remove('hidden');
+    let firstInvalidEl: HTMLElement | null = null;
+    let firstErrorMessage = '';
+
+    const setInlineError = (
+      inputEl: HTMLElement | null,
+      errorEl: HTMLElement | null,
+      msg: string
+    ) => {
+      if (errorEl) {
+        errorEl.textContent = msg;
+        errorEl.classList.remove('hidden');
       }
-      return;
+      if (inputEl) {
+        inputEl.classList.remove('border-white/10');
+        inputEl.classList.add('border-rose-500');
+      }
+      if (!firstInvalidEl) {
+        firstInvalidEl = inputEl;
+        firstErrorMessage = msg;
+      }
+    };
+
+    // 1. Validación de Nombre y Apellidos (letras, espacios, máx. 50 caracteres)
+    if (!nameVal) {
+      setInlineError(nameInput, errorName, 'Ingresa tu nombre y apellidos.');
+    } else if (nameVal.length < 3) {
+      setInlineError(nameInput, errorName, 'El nombre debe tener al menos 3 caracteres.');
+    } else if (nameVal.length > 50) {
+      setInlineError(nameInput, errorName, 'El nombre no puede superar los 50 caracteres.');
+    } else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(nameVal)) {
+      setInlineError(nameInput, errorName, 'El nombre solo puede contener letras y espacios.');
     }
 
-    const forbiddenPattern = /[/*[\]{}()]/;
-    if (
-      forbiddenPattern.test(nameVal) ||
-      forbiddenPattern.test(docVal) ||
-      forbiddenPattern.test(addrVal) ||
-      forbiddenPattern.test(emailVal)
-    ) {
-      if (alertBox) {
-        alertBox.textContent = 'Error: No se permiten caracteres especiales como /*[]{}() en los campos.';
-        alertBox.classList.remove('hidden');
+    // 2. Validación Cédula / RUC (10 dígitos exactos o 13 dígitos terminado en 001)
+    if (!docVal) {
+      setInlineError(docInput, errorDoc, 'Ingresa tu Cédula o RUC.');
+    } else if (!/^\d+$/.test(docVal)) {
+      setInlineError(docInput, errorDoc, 'El documento solo debe contener números.');
+    } else if (docVal.length === 10) {
+      // Cédula válida de 10 dígitos
+    } else if (docVal.length === 13) {
+      if (!docVal.endsWith('001')) {
+        setInlineError(docInput, errorDoc, 'El RUC de 13 dígitos siempre debe terminar en 001.');
       }
-      return;
+    } else {
+      setInlineError(docInput, errorDoc, 'Debe ser cédula de 10 dígitos o RUC de 13 dígitos terminado en 001.');
     }
 
-    if (addrVal.length > 50) {
-      if (alertBox) {
-        alertBox.textContent = 'La Dirección de Entrega no puede superar los 50 caracteres.';
-        alertBox.classList.remove('hidden');
-      }
-      return;
+    // 3. Validación Teléfono WhatsApp (10 dígitos exactos celular Ecuador ej: 09XXXXXXXX)
+    const phoneTargetEl = phoneContainer || phoneInput;
+    if (!phoneVal) {
+      setInlineError(phoneTargetEl, errorPhone, 'Ingresa tu número de WhatsApp.');
+    } else if (!/^\d+$/.test(phoneVal)) {
+      setInlineError(phoneTargetEl, errorPhone, 'El teléfono solo debe contener números.');
+    } else if (phoneVal.length !== 10) {
+      setInlineError(phoneTargetEl, errorPhone, 'El número celular debe tener exactamente 10 dígitos.');
+    } else if (!phoneVal.startsWith('09')) {
+      setInlineError(phoneTargetEl, errorPhone, 'El número celular debe iniciar con 09 (ej: 0990000000).');
     }
 
-    if (nameVal.length > 30 || docVal.length > 30 || emailVal.length > 30) {
-      if (alertBox) {
-        alertBox.textContent = 'Los campos Nombre, Documento y Correo no pueden superar los 30 caracteres.';
-        alertBox.classList.remove('hidden');
-      }
-      return;
+    // 4. Validación Correo Electrónico (con @ y extensión de dominio válida)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailVal) {
+      setInlineError(emailInput, errorEmail, 'Ingresa tu correo electrónico.');
+    } else if (emailVal.length > 50) {
+      setInlineError(emailInput, errorEmail, 'El correo no puede superar los 50 caracteres.');
+    } else if (!emailRegex.test(emailVal)) {
+      setInlineError(emailInput, errorEmail, 'Ingresa un correo electrónico válido (ej: nombre@dominio.com).');
     }
 
-    if (!/^\d+$/.test(phoneVal)) {
-      if (alertBox) {
-        alertBox.textContent = 'El teléfono solo debe contener números.';
-        alertBox.classList.remove('hidden');
-      }
-      return;
+    // 5. Validación Dirección de Entrega (máx. 100 caracteres, solo letras, números, espacios y guion -)
+    if (!addrVal) {
+      setInlineError(addrInput, errorAddr, 'Ingresa la dirección de entrega.');
+    } else if (addrVal.length < 5) {
+      setInlineError(addrInput, errorAddr, 'La dirección es demasiado corta (mínimo 5 caracteres).');
+    } else if (addrVal.length > 100) {
+      setInlineError(addrInput, errorAddr, 'La dirección no puede superar los 100 caracteres.');
+    } else if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s\-]+$/.test(addrVal)) {
+      setInlineError(addrInput, errorAddr, 'Solo se permiten letras, números, espacios y guiones (-).');
     }
 
-    if (phoneVal.length > 30) {
+    // Si hubo algún error: hacer foco y scroll automático hacia el primer campo infractor
+    if (firstInvalidEl) {
       if (alertBox) {
-        alertBox.textContent = 'El teléfono no puede superar los 30 dígitos.';
+        alertBox.textContent = `Por favor revisa el campo señalado: ${firstErrorMessage}`;
         alertBox.classList.remove('hidden');
       }
+      (firstInvalidEl as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const focusTarget = (firstInvalidEl as HTMLElement).tagName === 'INPUT'
+        ? firstInvalidEl
+        : (firstInvalidEl as HTMLElement).querySelector('input') || firstInvalidEl;
+      (focusTarget as HTMLElement).focus();
       return;
     }
 
