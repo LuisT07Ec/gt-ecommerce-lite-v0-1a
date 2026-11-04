@@ -11,3 +11,10 @@ DETALLE:           Orden WG-QBJYJ9 registrada exitosamente en las pestañas Vent
 RESPONSABILIDAD:   Consentimiento otorgado directamente por el usuario titular a Google.
                    El software GT E-commerce Lite opera 100% descentralizado.
 ================================================================================
+================================================================================
+[2026-11-04T01:43:30.057Z] [CONSENTIMIENTO_OAUTH2] VENTA_REGISTRADA_EN_GOOGLE_SHEETS
+CUENTA AUTORIZADA: Webhook Apps Script
+DETALLE:           Orden WG-KGMBYG registrada exitosamente en las pestañas Venta y DetalleVenta. Cliente: Juan Carlos Estrada | Total: $241.5
+RESPONSABILIDAD:   Consentimiento otorgado directamente por el usuario titular a Google.
+                   El software GT E-commerce Lite opera 100% descentralizado.
+================================================================================
