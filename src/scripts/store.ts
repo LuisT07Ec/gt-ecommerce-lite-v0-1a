@@ -371,7 +371,7 @@ export function initStorefront(catalogCategories: CategoriaCatalogo[] = []) {
   // Order Form Submission -> Astro Proxy API -> WhatsApp + Order Success Redirect
   const orderForm = document.getElementById('orderConfirmForm') as HTMLFormElement | null;
 
-  // Limpiar errores en tiempo real al escribir
+  // Sanitización y limpieza de errores en tiempo real al escribir
   const fieldConfigs = [
     { inputId: 'orderCustomerName', errorId: 'errorCustomerName' },
     { inputId: 'orderCustomerDoc', errorId: 'errorCustomerDoc' },
@@ -384,7 +384,34 @@ export function initStorefront(catalogCategories: CategoriaCatalogo[] = []) {
     const inputEl = document.getElementById(inputId) as HTMLInputElement | null;
     const errorEl = document.getElementById(errorId);
     const containerEl = containerId ? document.getElementById(containerId) : null;
+
+    // Prevenir espacio en blanco en campos numéricos y correo
+    if (inputId === 'orderCustomerDoc' || inputId === 'orderCustomerPhone' || inputId === 'orderCustomerEmail') {
+      inputEl?.addEventListener('keydown', (e) => {
+        if (e.key === ' ') e.preventDefault();
+      });
+    }
+
     inputEl?.addEventListener('input', () => {
+      // 1. Sanitización de caracteres permitidos según el tipo de campo
+      if (inputId === 'orderCustomerName') {
+        // Permite letras (con tildes, ñ) y espacio para separar nombres/apellidos
+        inputEl.value = inputEl.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '').slice(0, 50);
+      } else if (inputId === 'orderCustomerDoc') {
+        // Estrictamente números (máx. 13 dígitos)
+        inputEl.value = inputEl.value.replace(/[^0-9]/g, '').slice(0, 13);
+      } else if (inputId === 'orderCustomerPhone') {
+        // Estrictamente números (máx. 10 dígitos)
+        inputEl.value = inputEl.value.replace(/[^0-9]/g, '').slice(0, 10);
+      } else if (inputId === 'orderCustomerEmail') {
+        // Sin espacios y bloquea exclusivamente los 3 tipos de símbolos: (), {}, []
+        inputEl.value = inputEl.value.replace(/[\s\(\)\{\}\[\]]/g, '').slice(0, 50);
+      } else if (inputId === 'orderCustomerAddress') {
+        // Permite letras, números, espacio y guion (-)
+        inputEl.value = inputEl.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ \-]/g, '').slice(0, 100);
+      }
+
+      // 2. Limpiar indicador visual de error
       if (errorEl) {
         errorEl.textContent = '';
         errorEl.classList.add('hidden');
